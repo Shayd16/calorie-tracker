@@ -34,7 +34,7 @@ if menu == "Dashboard":
     st.write("---")
     
     # Progress Bar
-    st.write(**Goal Progress**)
+    st.write("**Goal Progress**")
     st.progress(progress)
     
     # Dynamic Chart
