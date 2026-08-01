@@ -110,11 +110,10 @@ with tab_log:
         with st.container(border=True):
             st.markdown("### 🍽️ Type What You Ate or Drank")
             
-            # Toggle between Quick Menu and Typing Custom Entry
             entry_type = st.radio("Choose Input Method:", ["Type Custom Item", "Select Quick Menu"], key="entry_type")
             
             if entry_type == "Type Custom Item":
-                item_name = st.text_input("Name of Food/Drink:", placeholder="e.g. Turkey Sandwich, Gatorade, Smoothie...", key="custom_name")
+                item_name = st.text_input("Name of Food/Drink:", placeholder="e.g. Turkey Sandwich, Gatorade...", key="custom_name")
                 item_cals = st.number_input("Calories:", min_value=0, step=25, key="custom_cals")
                 
                 if st.button("➕ Log Typed Item", use_container_width=True):
@@ -127,4 +126,37 @@ with tab_log:
             
             else:
                 selected_food = st.selectbox("Select Quick Item:", list(FOOD_DATABASE.keys()))
-                food_cals =
+                food_cals = FOOD_DATABASE[selected_food]
+                st.info(f"**Calories:** {food_cals} kcal")
+                
+                if st.button("➕ Log Menu Item", use_container_width=True):
+                    st.session_state.calories_eaten += food_cals
+                    st.session_state.food_history.append(f"{selected_food} ({food_cals} kcal)")
+                    st.toast(f"Added {selected_food}!", icon="🥗")
+
+    # --- WORKOUT LOGGING ---
+    with col_ex:
+        with st.container(border=True):
+            st.markdown("### 🔥 Log Exercise")
+            workout_name = st.text_input("Workout Name:", placeholder="e.g. Running, Weightlifting...", key="ex_name")
+            workout_cals = st.number_input("Calories Burned:", min_value=0, step=25, key="ex_cals")
+            
+            if st.button("➕ Log Workout", use_container_width=True):
+                if workout_cals > 0:
+                    st.session_state.calories_burned += workout_cals
+                    label = workout_name if workout_name.strip() != "" else "Workout"
+                    st.toast(f"Logged {label} (-{workout_cals} kcal)!", icon="🏃")
+
+    # --- WATER LOGGING ---
+    with col_water:
+        with st.container(border=True):
+            st.markdown("### 💧 Quick Water Log")
+            st.markdown(f"#### **{st.session_state.water_glasses}** / {water_goal} Glasses")
+            
+            if st.button("🥤 +1 Glass of Water", use_container_width=True):
+                st.session_state.water_glasses += 1
+                st.toast("Added 1 glass of water!", icon="💧")
+                
+            if st.button("➖ Remove 1 Glass", use_container_width=True):
+                if st.session_state.water_glasses > 0:
+                    st.session_state.water_glasses -= 1
