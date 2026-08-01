@@ -303,15 +303,87 @@ EXERCISE_MET_LIBRARY = {
 # SECTION 5: GAMIFICATION BADGES
 # ==============================================================================
 GAMIFICATION_BADGES = {
-    "First Step": {"desc": "Logged your first activity on FitPulse Pro.", "icon": "🥉"},
-    "Hydration Starter": {"desc": "Logged at least 8 glasses of water in a day.", "icon": "💧"},
-    "Macro Master": {"desc": "Hit your exact protein target within 5%.", "icon": "🥩"},
-    "Calorie Precision": {"desc": "Stayed within 50 kcal of your daily target.", "icon": "🎯"},
-    "Iron Lifter": {"desc": "Logged 3 or more strength workouts.", "icon": "🏋️"},
-    "Cardio Machine": {"desc": "Burned 500+ kcal in exercise in a single day.", "icon": "🔥"},
-    "Streak Legend": {"desc": "Maintained a 7-day active usage streak.", "icon": "⚡"},
-    "Sleep Guardian": {"desc": "Logged 8+ hours of restful sleep.", "icon": "🌙"},
-    "Centurion": {"desc": "Earned over 1,000 total XP points.", "icon": "👑"}
+ # ==============================================================================
+# SECTION 5: DYNAMIC 100+ GAMIFICATION BADGE SYSTEM
+# ==============================================================================
+def generate_badge_database():
+    badges = {}
+
+    # Category 1: Streaks & Consistency (15 Badges)
+    streak_milestones = [1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60, 90, 100, 180, 365]
+    for days in streak_milestones:
+        badges[f"Streak Legend {days}D"] = {
+            "desc": f"Logged activity for {days} consecutive day{'s' if days > 1 else ''}.",
+            "icon": "⚡",
+            "category": "Consistency"
+        }
+
+    # Category 2: Level & Experience Milestones (15 Badges)
+    level_milestones = [1, 2, 3, 5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 90, 100]
+    for lvl in level_milestones:
+        badges[f"Rank Veteran Lvl {lvl}"] = {
+            "desc": f"Reached Athlete Level {lvl} by earning XP.",
+            "icon": "👑",
+            "category": "XP Ranks"
+        }
+
+    # Category 3: Hydration Mastery (12 Badges)
+    water_milestones = [5, 8, 10, 12, 15, 20, 25, 30, 40, 50, 75, 100]
+    for glasses in water_milestones:
+        badges[f"Hydration Master {glasses}G"] = {
+            "desc": f"Logged a single-day total of {glasses} glasses of water.",
+            "icon": "💧",
+            "category": "Hydration"
+        }
+
+    # Category 4: Sleep & Recovery (10 Badges)
+    sleep_milestones = [6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 12.0]
+    for hrs in sleep_milestones:
+        badges[f"Sleep Guardian {hrs}h"] = {
+            "desc": f"Logged {hrs} hours of restful sleep in a single night.",
+            "icon": "🌙",
+            "category": "Recovery"
+        }
+
+    # Category 5: Calorie Burn & Cardio Intensity (15 Badges)
+    burn_milestones = [100, 250, 500, 750, 1000, 1250, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 10000]
+    for burn in burn_milestones:
+        badges[f"Calorie Burner {burn} kcal"] = {
+            "desc": f"Burned {burn} kcal through recorded exercise activities.",
+            "icon": "🔥",
+            "category": "Cardio"
+        }
+
+    # Category 6: Protein Focus & Muscle Building (12 Badges)
+    protein_milestones = [50, 75, 100, 120, 140, 160, 180, 200, 225, 250, 275, 300]
+    for prot in protein_milestones:
+        badges[f"Protein Titan {prot}g"] = {
+            "desc": f"Consumed {prot} grams of protein in a single day.",
+            "icon": "🥩",
+            "category": "Macros"
+        }
+
+    # Category 7: Strength & Lifting Sets Logged (12 Badges)
+    lifting_milestones = [1, 5, 10, 20, 30, 50, 75, 100, 150, 200, 300, 500]
+    for lifts in lifting_milestones:
+        badges[f"Iron Lifter {lifts} Sets"] = {
+            "desc": f"Logged {lifts} total strength training set{'s' if lifts > 1 else ''}.",
+            "icon": "🏋️",
+            "category": "Strength"
+        }
+
+    # Category 8: Food Database Exploration (10 Badges)
+    food_count_milestones = [1, 5, 10, 25, 50, 75, 100, 150, 200, 250]
+    for foods in food_count_milestones:
+        badges[f"Gourmet Tracker {foods} Meals"] = {
+            "desc": f"Recorded {foods} total meal entries in your daily logs.",
+            "icon": "🥗",
+            "category": "Nutrition"
+        }
+
+    return badges
+
+GAMIFICATION_BADGES = generate_badge_database()
 }
 
 MOTIVATIONAL_QUOTES = [
@@ -326,44 +398,68 @@ MOTIVATIONAL_QUOTES = [
 # ==============================================================================
 # SECTION 6: SESSION STATE ENGINE
 # ==============================================================================
-raw_system_state = load_system_data()
+# ==============================================================================
+# TAB 6: GAMIFICATION & 100+ BADGES SHOWCASE
+# ==============================================================================
+with app_tabs[5]:
+    st.markdown("<div class='section-header'>🏆 Ranks & Achievements</div>", unsafe_allow_html=True)
+    
+    g_col1, g_col2 = st.columns([1, 3])
+    
+    with g_col1:
+        with st.container(border=True):
+            st.markdown("<div class='sub-header'>👑 Rank Telemetry</div>", unsafe_allow_html=True)
+            st.write(f"**Level {st.session_state.user_level} Athlete**")
+            st.write(f"**Total XP:** {st.session_state.xp_points}")
+            st.write(f"**Current Streak:** {st.session_state.streak_count} Days ⚡")
+            
+            unlocked_cnt = len(st.session_state.unlocked_badges)
+            total_cnt = len(GAMIFICATION_BADGES)
+            st.write(f"**Badges Unlocked:** {unlocked_cnt} / {total_cnt}")
+            st.progress(unlocked_cnt / total_cnt)
 
-if "user_profile" not in st.session_state:
-    st.session_state.user_profile = raw_system_state.get("profile", {})
-if "streak_count" not in st.session_state:
-    st.session_state.streak_count = raw_system_state.get("streak_count", 1)
-if "xp_points" not in st.session_state:
-    st.session_state.xp_points = raw_system_state.get("xp_points", 200)
-if "user_level" not in st.session_state:
-    st.session_state.user_level = raw_system_state.get("user_level", 1)
-if "unlocked_badges" not in st.session_state:
-    st.session_state.unlocked_badges = raw_system_state.get("unlocked_badges", ["First Step", "Hydration Starter"])
-if "custom_recipes" not in st.session_state:
-    st.session_state.custom_recipes = raw_system_state.get("custom_recipes", {})
-if "strength_workouts" not in st.session_state:
-    st.session_state.strength_workouts = raw_system_state.get("strength_workouts", [])
-if "history_logs" not in st.session_state:
-    st.session_state.history_logs = raw_system_state.get("daily_logs", {})
+    with g_col2:
+        st.markdown("### 🏅 Achievements Showcase (100+ Badges)")
+        
+        # Category Filter Bar
+        categories = ["All"] + sorted(list(set(b["category"] for b in GAMIFICATION_BADGES.values())))
+        selected_cat = st.selectbox("Filter Badges by Category:", categories)
+        
+        search_query = st.text_input("🔎 Search Badges:", placeholder="e.g. 100 kcal, Hydration, Streak")
+        
+        # Filter Logic
+        filtered_badges = {}
+        for b_name, b_data in GAMIFICATION_BADGES.items():
+            matches_cat = (selected_cat == "All") or (b_data["category"] == selected_cat)
+            matches_search = (search_query.lower() in b_name.lower()) or (search_query.lower() in b_data["desc"].lower())
+            if matches_cat and matches_search:
+                filtered_badges[b_name] = b_data
 
-current_today_key = str(datetime.date.today())
-
-if current_today_key not in st.session_state.history_logs:
-    st.session_state.history_logs[current_today_key] = {
-        "calories_eaten": 0,
-        "calories_burned": 0,
-        "protein_g": 0,
-        "carbs_g": 0,
-        "fat_g": 0,
-        "fiber_g": 0,
-        "sodium_mg": 0,
-        "potassium_mg": 0,
-        "water_glasses": 0,
-        "sleep_hours": 0.0,
-        "entries": []
-    }
-
-active_day = st.session_state.history_logs[current_today_key]
-
+        st.caption(f"Showing **{len(filtered_badges)}** badges")
+        
+        # Render Badges in 3 Grid Columns
+        badge_cols = st.columns(3)
+        for idx, (b_title, b_info) in enumerate(filtered_badges.items()):
+            col_target = badge_cols[idx % 3]
+            is_unlocked = b_title in st.session_state.unlocked_badges
+            
+            with col_target:
+                if is_unlocked:
+                    st.markdown(f"""
+                        <div class='badge-card-unlocked'>
+                            <h4>{b_info['icon']} {b_title}</h4>
+                            <p style='font-size:0.85rem;'>{b_info['desc']}</p>
+                            <small><b>✅ UNLOCKED</b></small>
+                        </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                        <div class='badge-card'>
+                            <h4>🔒 {b_title}</h4>
+                            <p style='font-size:0.85rem; color:#888;'>{b_info['desc']}</p>
+                            <small style='color:#666;'>LOCKED</small>
+                        </div>
+                    """, unsafe_allow_html=True)
 # ==============================================================================
 # SECTION 7: BIOMETRIC COMPUTATION ENGINES
 # ==============================================================================
