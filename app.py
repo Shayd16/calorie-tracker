@@ -7,7 +7,7 @@ import os
 import math
 
 # ==============================================================================
-# SECTION 1: PAGE CONFIGURATION & GLOBAL STYLES
+# SECTION 1: PAGE CONFIGURATION & METRIC THEMING
 # ==============================================================================
 st.set_page_config(
     page_title="FitPulse Pro | Complete Health & Nutrition Suite",
@@ -16,28 +16,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom High-Contrast Modern Theme CSS
+# Custom High-Contrast Modern Dark CSS Theme
 st.markdown("""
     <style>
-    /* Global App Background */
+    /* Main Background */
     .stApp {
         background-color: #0A0D12;
         color: #F0F2F5;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* Sidebar Background Override */
+    /* Sidebar Layout */
     section[data-testid="stSidebar"] {
         background-color: #121620;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }
     
-    /* Container Border Enhancements */
+    /* Container Borders */
     div[data-testid="stVerticalBlock"] > div[data-testid="stBlock"] {
         border-radius: 12px;
     }
     
-    /* High-Tech Metric Cards */
+    /* High-Tech Metric Display Cards */
     div[data-testid="stMetric"] {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -52,14 +52,14 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    /* Custom Navigation Tab Design */
+    /* Navigation Bar Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding-bottom: 8px;
     }
     .stTabs [data-baseweb="tab"] {
-        padding: 12px 24px;
+        padding: 12px 20px;
         border-radius: 8px;
         background-color: rgba(255, 255, 255, 0.03);
         color: #A0AAB8;
@@ -75,7 +75,7 @@ st.markdown("""
         box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
     }
     
-    /* Section Titles */
+    /* Typography Styles */
     .section-header {
         font-size: 1.5rem;
         font-weight: 700;
@@ -94,25 +94,25 @@ st.markdown("""
         margin-bottom: 10px;
     }
 
-    /* Custom Badges */
+    /* Badge Displays */
     .badge-card {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 12px;
+        padding: 14px;
         border-radius: 10px;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
     .badge-card-unlocked {
         background: rgba(0, 230, 118, 0.1);
         border: 1px solid #00E676;
-        padding: 12px;
+        padding: 14px;
         border-radius: 10px;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
-    /* Custom Progress Bar Override */
+    /* Override Streamlit Accent Color */
     .stProgress > div > div > div > div {
         background-color: #00E676;
     }
@@ -120,36 +120,37 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# SECTION 2: DATA PERSISTENCE & FILE STORAGE ENGINE
+# SECTION 2: DATA STORAGE ENGINE & INITIALIZATION
 # ==============================================================================
 DATA_FILE_PATH = "fitpulse_enterprise_data.json"
 
 def initialize_default_system_state():
-    """Generates the initial state tree if no local storage file exists."""
+    """Generates the initial state data object if no saved file exists."""
     return {
         "profile": {
             "name": "Athlete Pro",
-            "age": 24,
-            "weight_kg": 75.0,
+            "age": 25,
+            "weight_kg": 76.0,
             "height_cm": 178.0,
             "gender": "Male",
             "activity_level": "Moderately Active",
             "goal_type": "Maintain Weight",
-            "custom_cal_goal": 2300,
+            "custom_cal_goal": 2400,
             "custom_water_goal": 10,
-            "protein_goal_g": 160,
-            "carbs_goal_g": 260,
+            "protein_goal_g": 165,
+            "carbs_goal_g": 270,
             "fat_goal_g": 70,
-            "fiber_goal_g": 30,
+            "fiber_goal_g": 32,
             "sodium_goal_mg": 2300,
+            "potassium_goal_mg": 3500,
             "sleep_goal_hrs": 8.0,
             "neck_cm": 38.0,
-            "waist_cm": 82.0,
+            "waist_cm": 81.0,
             "hip_cm": 95.0
         },
         "streak_count": 1,
         "last_active_date": str(datetime.date.today()),
-        "xp_points": 150,
+        "xp_points": 200,
         "user_level": 1,
         "unlocked_badges": ["First Step", "Hydration Starter"],
         "custom_recipes": {},
@@ -158,18 +159,18 @@ def initialize_default_system_state():
     }
 
 def load_system_data():
-    """Reads stored JSON telemetry from local storage."""
+    """Reads telemetry from local JSON storage."""
     if os.path.exists(DATA_FILE_PATH):
         try:
             with open(DATA_FILE_PATH, "r") as storage_file:
                 return json.load(storage_file)
         except Exception as err:
-            st.warning(f"Storage reload error: {err}. Reverting to defaults.")
+            st.warning(f"Storage reload error: {err}. Loading default profile.")
             return initialize_default_system_state()
     return initialize_default_system_state()
 
 def commit_system_data():
-    """Writes session state telemetry to disk."""
+    """Writes session telemetry to disk storage."""
     persistent_payload = {
         "profile": st.session_state.user_profile,
         "streak_count": st.session_state.streak_count,
@@ -188,105 +189,119 @@ def commit_system_data():
         st.error(f"Failed to persist state: {err}")
 
 # ==============================================================================
-# SECTION 3: EXTENDED NUTRITION, MICRONUTRIENT & EXERCISE LIBRARIES
+# SECTION 3: COMPREHENSIVE NUTRITION DATABASE
 # ==============================================================================
 FOOD_LIBRARY = {
-    # Meats, Poultry & Fish
-    "Chicken Breast (Grilled, 6oz)": {"cals": 280, "p": 52, "c": 0, "f": 6, "fiber": 0, "sodium": 120},
-    "Chicken Thigh (Skinless, 6oz)": {"cals": 330, "p": 42, "c": 0, "f": 18, "fiber": 0, "sodium": 140},
-    "Salmon Fillet (Baked, 6oz)": {"cals": 340, "p": 34, "c": 0, "f": 22, "fiber": 0, "sodium": 90},
-    "Sirloin Steak (6oz)": {"cals": 410, "p": 46, "c": 0, "f": 24, "fiber": 0, "sodium": 100},
-    "Ground Turkey 93% (6oz)": {"cals": 290, "p": 36, "c": 0, "f": 14, "fiber": 0, "sodium": 115},
-    "Canned Tuna in Water (1 Can)": {"cals": 150, "p": 32, "c": 0, "f": 2, "fiber": 0, "sodium": 350},
-    "Shrimp (Cooked, 6oz)": {"cals": 160, "p": 36, "c": 1, "f": 2, "fiber": 0, "sodium": 380},
-    "Ground Beef 80/20 (6oz)": {"cals": 430, "p": 43, "c": 0, "f": 28, "fiber": 0, "sodium": 110},
-    "Pork Chop (Lean, 6oz)": {"cals": 310, "p": 44, "c": 0, "f": 14, "fiber": 0, "sodium": 85},
-    "Cod Fillet (Baked, 6oz)": {"cals": 180, "p": 38, "c": 0, "f": 2, "fiber": 0, "sodium": 110},
+    # Meats & Poultry
+    "Chicken Breast (Grilled, 6oz)": {"cals": 280, "p": 52, "c": 0, "f": 6, "fiber": 0, "sodium": 120, "potassium": 440},
+    "Chicken Thigh (Skinless, 6oz)": {"cals": 330, "p": 42, "c": 0, "f": 18, "fiber": 0, "sodium": 140, "potassium": 380},
+    "Lean Ground Turkey 93/7 (6oz)": {"cals": 290, "p": 36, "c": 0, "f": 14, "fiber": 0, "sodium": 115, "potassium": 410},
+    "Turkey Breast Slices (4oz)": {"cals": 120, "p": 24, "c": 1, "f": 2, "fiber": 0, "sodium": 650, "potassium": 300},
+    "Sirloin Steak (Lean, 6oz)": {"cals": 390, "p": 48, "c": 0, "f": 20, "fiber": 0, "sodium": 105, "potassium": 560},
+    "Ground Beef 80/20 (6oz)": {"cals": 430, "p": 43, "c": 0, "f": 28, "fiber": 0, "sodium": 110, "potassium": 490},
+    "Pork Chop (Boneless, 6oz)": {"cals": 310, "p": 44, "c": 0, "f": 14, "fiber": 0, "sodium": 85, "potassium": 510},
+    "Center Cut Bacon (3 Strips)": {"cals": 130, "p": 9, "c": 0, "f": 10, "fiber": 0, "sodium": 480, "potassium": 160},
 
-    # Eggs, Dairy & Plant Proteins
-    "Eggs (Large, 2 Whole)": {"cals": 140, "p": 12, "c": 1, "f": 10, "fiber": 0, "sodium": 140},
-    "Egg Whites (1 Cup)": {"cals": 120, "p": 26, "c": 2, "f": 0, "fiber": 0, "sodium": 400},
-    "Tofu (Firm, 1 Cup)": {"cals": 180, "p": 20, "c": 4, "f": 11, "fiber": 2, "sodium": 20},
-    "Tempeh (1 Cup)": {"cals": 320, "p": 31, "c": 16, "f": 18, "fiber": 7, "sodium": 15},
-    "Whey Protein Powder (1 Scoop)": {"cals": 120, "p": 24, "c": 3, "f": 2, "fiber": 1, "sodium": 130},
-    "Plant Protein Powder (1 Scoop)": {"cals": 130, "p": 22, "c": 5, "f": 3, "fiber": 3, "sodium": 200},
-    "Greek Yogurt 0% (1 Cup)": {"cals": 130, "p": 22, "c": 8, "f": 0, "fiber": 0, "sodium": 85},
-    "Cottage Cheese 2% (1 Cup)": {"cals": 180, "p": 24, "c": 8, "f": 5, "fiber": 0, "sodium": 700},
-    "Edamame (Steamed, 1 Cup)": {"cals": 188, "p": 18, "c": 14, "f": 8, "fiber": 8, "sodium": 10},
+    # Fish & Seafood
+    "Atlantic Salmon Fillet (6oz)": {"cals": 350, "p": 35, "c": 0, "f": 22, "fiber": 0, "sodium": 95, "potassium": 620},
+    "Canned Light Tuna in Water (1 Can)": {"cals": 150, "p": 32, "c": 0, "f": 2, "fiber": 0, "sodium": 360, "potassium": 340},
+    "Shrimp (Steamed, 6oz)": {"cals": 160, "p": 36, "c": 1, "f": 2, "fiber": 0, "sodium": 380, "potassium": 310},
+    "Cod Fillet (Baked, 6oz)": {"cals": 175, "p": 38, "c": 0, "f": 2, "fiber": 0, "sodium": 110, "potassium": 460},
+    "Tilapia Fillet (Baked, 6oz)": {"cals": 210, "p": 44, "c": 0, "f": 4, "fiber": 0, "sodium": 90, "potassium": 520},
+    "Wild Halibut (Baked, 6oz)": {"cals": 220, "p": 45, "c": 0, "f": 4, "fiber": 0, "sodium": 115, "potassium": 750},
 
-    # Rice, Grains & Starchy Carbs
-    "White Rice (Cooked, 1 Cup)": {"cals": 205, "p": 4, "c": 45, "f": 0, "fiber": 1, "sodium": 0},
-    "Brown Rice (Cooked, 1 Cup)": {"cals": 215, "p": 5, "c": 45, "f": 2, "fiber": 4, "sodium": 2},
-    "Sweet Potato (Medium, Baked)": {"cals": 103, "p": 2, "c": 24, "f": 0, "fiber": 4, "sodium": 40},
-    "White Potato (Medium, Baked)": {"cals": 160, "p": 4, "c": 37, "f": 0, "fiber": 4, "sodium": 15},
-    "Oatmeal (Cooked, 1 Cup)": {"cals": 160, "p": 6, "c": 28, "f": 3, "fiber": 4, "sodium": 2},
-    "Quinoa (Cooked, 1 Cup)": {"cals": 220, "p": 8, "c": 39, "f": 4, "fiber": 5, "sodium": 13},
-    "Whole Wheat Bread (2 Slices)": {"cals": 160, "p": 8, "c": 28, "f": 2, "fiber": 4, "sodium": 260},
-    "Pasta (Cooked, 1 Cup)": {"cals": 220, "p": 8, "c": 43, "f": 1, "fiber": 3, "sodium": 1},
-    "Bagel (Plain, 1 Whole)": {"cals": 290, "p": 11, "c": 56, "f": 2, "fiber": 2, "sodium": 430},
+    # Eggs & Dairy
+    "Whole Eggs (Large, 2 Eggs)": {"cals": 140, "p": 12, "c": 1, "f": 10, "fiber": 0, "sodium": 140, "potassium": 125},
+    "Liquid Egg Whites (1 Cup)": {"cals": 120, "p": 26, "c": 2, "f": 0, "fiber": 0, "sodium": 400, "potassium": 370},
+    "Greek Yogurt Plain 0% (1 Cup)": {"cals": 130, "p": 23, "c": 8, "f": 0, "fiber": 0, "sodium": 85, "potassium": 320},
+    "Cottage Cheese 2% (1 Cup)": {"cals": 180, "p": 24, "c": 8, "f": 5, "fiber": 0, "sodium": 700, "potassium": 220},
+    "Skim Milk (1 Cup / 8 oz)": {"cals": 90, "p": 8, "c": 12, "f": 0, "fiber": 0, "sodium": 105, "potassium": 380},
+    "Whole Milk (1 Cup / 8 oz)": {"cals": 150, "p": 8, "c": 12, "f": 8, "fiber": 0, "sodium": 105, "potassium": 320},
+    "Cheddar Cheese (1 oz Slice)": {"cals": 115, "p": 7, "c": 1, "f": 9, "fiber": 0, "sodium": 180, "potassium": 30},
 
-    # Fruits & Vegetables
-    "Apple (Medium Whole)": {"cals": 95, "p": 0, "c": 25, "f": 0, "fiber": 4, "sodium": 1},
-    "Banana (Medium Whole)": {"cals": 105, "p": 1, "c": 27, "f": 0, "fiber": 3, "sodium": 1},
-    "Blueberries (1 Cup Fresh)": {"cals": 85, "p": 1, "c": 21, "f": 1, "fiber": 4, "sodium": 1},
-    "Strawberries (1 Cup Fresh)": {"cals": 50, "p": 1, "c": 12, "f": 0, "fiber": 3, "sodium": 1},
-    "Avocado (Medium Whole)": {"cals": 240, "p": 3, "c": 12, "f": 22, "fiber": 10, "sodium": 10},
-    "Broccoli (Steamed, 1 Cup)": {"cals": 55, "p": 4, "c": 11, "f": 0, "fiber": 5, "sodium": 60},
-    "Spinach (Raw, 2 Cups)": {"cals": 14, "p": 2, "c": 2, "f": 0, "fiber": 2, "sodium": 45},
-    "White Mushrooms (1 Cup)": {"cals": 15, "p": 2, "c": 2, "f": 0, "fiber": 1, "sodium": 5},
-    "Asparagus (10 Spears)": {"cals": 30, "p": 3, "c": 5, "f": 0, "fiber": 3, "sodium": 2},
+    # Plant-Based Proteins
+    "Firm Tofu (1 Cup Cubed)": {"cals": 180, "p": 20, "c": 4, "f": 11, "fiber": 2, "sodium": 20, "potassium": 290},
+    "Organic Tempeh (1 Cup)": {"cals": 320, "p": 31, "c": 16, "f": 18, "fiber": 7, "sodium": 15, "potassium": 680},
+    "Edamame (Steamed, 1 Cup)": {"cals": 190, "p": 18, "c": 14, "f": 8, "fiber": 8, "sodium": 10, "potassium": 670},
+    "Seitan / Wheat Gluten (3 oz)": {"cals": 180, "p": 31, "c": 6, "f": 2, "fiber": 1, "sodium": 300, "potassium": 100},
+    "Whey Isolate Powder (1 Scoop)": {"cals": 120, "p": 25, "c": 2, "f": 1, "fiber": 0, "sodium": 130, "potassium": 160},
+    "Plant Pea Protein (1 Scoop)": {"cals": 130, "p": 22, "c": 4, "f": 3, "fiber": 3, "sodium": 210, "potassium": 110},
 
-    # Nuts, Seeds & Healthy Fats
-    "Almonds (1 oz / ~28 Nuts)": {"cals": 160, "p": 6, "c": 6, "f": 14, "fiber": 4, "sodium": 0},
-    "Walnuts (1 oz)": {"cals": 185, "p": 4, "c": 4, "f": 18, "fiber": 2, "sodium": 0},
-    "Peanut Butter (2 tbsp)": {"cals": 190, "p": 8, "c": 7, "f": 16, "fiber": 2, "sodium": 140},
-    "Olive Oil (1 tbsp)": {"cals": 120, "p": 0, "c": 0, "f": 14, "fiber": 0, "sodium": 0},
-    "Chia Seeds (2 tbsp)": {"cals": 140, "p": 5, "c": 12, "f": 9, "fiber": 10, "sodium": 5},
+    # Grains & Carbohydrates
+    "Jasmine White Rice (Cooked, 1 Cup)": {"cals": 205, "p": 4, "c": 45, "f": 0, "fiber": 1, "sodium": 0, "potassium": 55},
+    "Brown Basmati Rice (Cooked, 1 Cup)": {"cals": 215, "p": 5, "c": 45, "f": 2, "fiber": 4, "sodium": 2, "potassium": 85},
+    "Rolled Oats (Dry, 1/2 Cup)": {"cals": 150, "p": 5, "c": 27, "f": 3, "fiber": 4, "sodium": 2, "potassium": 145},
+    "Quinoa (Cooked, 1 Cup)": {"cals": 220, "p": 8, "c": 39, "f": 4, "fiber": 5, "sodium": 13, "potassium": 320},
+    "Sweet Potato (Medium Baked)": {"cals": 103, "p": 2, "c": 24, "f": 0, "fiber": 4, "sodium": 40, "potassium": 540},
+    "Russet Potato (Medium Baked)": {"cals": 160, "p": 4, "c": 37, "f": 0, "fiber": 4, "sodium": 15, "potassium": 920},
+    "Whole Wheat Bread (2 Slices)": {"cals": 160, "p": 8, "c": 28, "f": 2, "fiber": 4, "sodium": 260, "potassium": 140},
+    "Penne Pasta (Cooked, 1 Cup)": {"cals": 220, "p": 8, "c": 43, "f": 1, "fiber": 3, "sodium": 1, "potassium": 60},
+    "Plain Bagel (1 Whole)": {"cals": 290, "p": 11, "c": 56, "f": 2, "fiber": 2, "sodium": 430, "potassium": 90},
 
-    # Convenience, Meals & Snacks
-    "Slice of Pepperoni Pizza": {"cals": 290, "p": 12, "c": 32, "f": 12, "fiber": 2, "sodium": 680},
-    "Cheeseburger (Fast Food)": {"cals": 535, "p": 30, "c": 40, "f": 28, "fiber": 2, "sodium": 1050},
-    "Protein Bar (Chocolate Crunch)": {"cals": 210, "p": 20, "c": 22, "f": 7, "fiber": 10, "sodium": 200},
-    "Sushi Roll (California Roll)": {"cals": 255, "p": 9, "c": 38, "f": 7, "fiber": 6, "sodium": 500},
-    "Burrito Bowl (Chicken & Rice)": {"cals": 650, "p": 45, "c": 68, "f": 21, "fiber": 12, "sodium": 1250}
+    # Vegetables & Greens
+    "Steamed Broccoli (1 Cup)": {"cals": 55, "p": 4, "c": 11, "f": 0, "fiber": 5, "sodium": 60, "potassium": 460},
+    "Raw Baby Spinach (2 Cups)": {"cals": 14, "p": 2, "c": 2, "f": 0, "fiber": 2, "sodium": 45, "potassium": 330},
+    "Chopped Kale (Raw, 2 Cups)": {"cals": 66, "p": 4, "c": 12, "f": 1, "fiber": 3, "sodium": 60, "potassium": 580},
+    "Asparagus Spears (10 Spears)": {"cals": 30, "p": 3, "c": 5, "f": 0, "fiber": 3, "sodium": 2, "potassium": 270},
+    "Grilled Zucchini (1 Cup)": {"cals": 20, "p": 1, "c": 4, "f": 0, "fiber": 1, "sodium": 10, "potassium": 320},
+    "White Button Mushrooms (1 Cup)": {"cals": 16, "p": 2, "c": 2, "f": 0, "fiber": 1, "sodium": 5, "potassium": 300},
+
+    # Fruits & Berries
+    "Fresh Banana (Medium)": {"cals": 105, "p": 1, "c": 27, "f": 0, "fiber": 3, "sodium": 1, "potassium": 422},
+    "Red Apple (Medium)": {"cals": 95, "p": 0, "c": 25, "f": 0, "fiber": 4, "sodium": 1, "potassium": 195},
+    "Fresh Blueberries (1 Cup)": {"cals": 85, "p": 1, "c": 21, "f": 1, "fiber": 4, "sodium": 1, "potassium": 115},
+    "Fresh Strawberries (1 Cup)": {"cals": 50, "p": 1, "c": 12, "f": 0, "fiber": 3, "sodium": 1, "potassium": 220},
+    "Hass Avocado (1 Medium)": {"cals": 240, "p": 3, "c": 12, "f": 22, "fiber": 10, "sodium": 10, "potassium": 700},
+
+    # Nuts & Healthy Oils
+    "Raw Almonds (1 oz / 28 nuts)": {"cals": 160, "p": 6, "c": 6, "f": 14, "fiber": 4, "sodium": 0, "potassium": 200},
+    "Walnut Halves (1 oz)": {"cals": 185, "p": 4, "c": 4, "f": 18, "fiber": 2, "sodium": 0, "potassium": 125},
+    "Natural Peanut Butter (2 tbsp)": {"cals": 190, "p": 8, "c": 7, "f": 16, "fiber": 2, "sodium": 140, "potassium": 210},
+    "Extra Virgin Olive Oil (1 tbsp)": {"cals": 120, "p": 0, "c": 0, "f": 14, "fiber": 0, "sodium": 0, "potassium": 0},
+    "Chia Seeds (2 tbsp)": {"cals": 140, "p": 5, "c": 12, "f": 9, "fiber": 10, "sodium": 5, "potassium": 115}
 }
 
+# ==============================================================================
+# SECTION 4: EXERCISE MET DATABASE
+# ==============================================================================
 EXERCISE_MET_LIBRARY = {
-    "Cardio": {
-        "Running (Moderate, 5 mph)": 8.3,
-        "Running (Vigorous, 7.5 mph)": 11.8,
-        "Running (Sprint Interval)": 14.5,
-        "Cycling (Moderate, 12-14 mph)": 6.8,
-        "Cycling (Vigorous, 16+ mph)": 10.0,
+    "Cardio & Endurance": {
+        "Running (Slow Pace, 5 mph)": 8.3,
+        "Running (Moderate Pace, 6.7 mph)": 10.5,
+        "Running (Vigorous Sprint, 8.5+ mph)": 13.3,
+        "Outdoor Cycling (Moderate, 12-14 mph)": 6.8,
+        "Outdoor Cycling (Vigorous, 16+ mph)": 10.0,
         "Rowing Machine (Moderate)": 7.0,
         "Rowing Machine (Intense)": 8.5,
-        "Elliptical Machine": 5.0,
+        "Elliptical Machine (Moderate)": 5.0,
         "Stairmaster / Step Mill": 9.0,
-        "Jumping Rope (Moderate)": 11.8,
+        "Jumping Rope (Moderate Pace)": 11.8,
         "Brisk Walking (3.5 mph)": 3.8
     },
-    "Strength Training": {
-        "Bodybuilding (Heavy Weightlifting)": 6.0,
-        "Circuit Training (High Intensity)": 8.0,
+    "Strength & Conditioning": {
+        "Bodybuilding Weightlifting (Heavy Sets)": 6.0,
+        "High Intensity Circuit Training": 8.0,
         "Calisthenics (Push-ups, Pull-ups)": 5.0,
-        "Powerlifting (Low Reps, Heavy Rest)": 4.0,
-        "Kettlebell Swings / Flow": 9.8,
-        "CrossFit WOD": 10.0
+        "Powerlifting Low Rep Focus": 4.0,
+        "Kettlebell Swings & Flow": 9.8,
+        "CrossFit Functional WOD": 10.0
     },
     "Sports & Recreation": {
-        "Basketball (Competitive Game)": 8.0,
-        "Soccer (Full Pitch Match)": 10.0,
-        "Tennis (Singles Match)": 7.3,
-        "Swimming (Freestyle Moderate)": 5.8,
-        "Swimming (Laps Vigorous)": 9.8,
-        "Volleyball (Beach or Indoor)": 4.0,
-        "Boxing (Sparring or Heavy Bag)": 7.8,
-        "Rock Climbing": 8.0,
-        "Yoga / Vinyasa Flow": 3.0,
+        "Basketball (Full Court Game)": 8.0,
+        "Soccer Match (Competitive)": 10.0,
+        "Tennis Singles Match": 7.3,
+        "Swimming Laps (Moderate Freestyle)": 5.8,
+        "Swimming Laps (Vigorous Butterfly/Freestyle)": 9.8,
+        "Boxing Sparring / Heavy Bag": 7.8,
+        "Indoor Rock Climbing": 8.0,
+        "Vinyasa Power Yoga": 3.0,
         "Pilates Mat Work": 3.0
     }
 }
 
+# ==============================================================================
+# SECTION 5: GAMIFICATION BADGES
+# ==============================================================================
 GAMIFICATION_BADGES = {
     "First Step": {"desc": "Logged your first activity on FitPulse Pro.", "icon": "🥉"},
     "Hydration Starter": {"desc": "Logged at least 8 glasses of water in a day.", "icon": "💧"},
@@ -309,7 +324,7 @@ MOTIVATIONAL_QUOTES = [
 ]
 
 # ==============================================================================
-# SECTION 4: SESSION STATE INITIALIZATION & ROUTING
+# SECTION 6: SESSION STATE ENGINE
 # ==============================================================================
 raw_system_state = load_system_data()
 
@@ -318,7 +333,7 @@ if "user_profile" not in st.session_state:
 if "streak_count" not in st.session_state:
     st.session_state.streak_count = raw_system_state.get("streak_count", 1)
 if "xp_points" not in st.session_state:
-    st.session_state.xp_points = raw_system_state.get("xp_points", 150)
+    st.session_state.xp_points = raw_system_state.get("xp_points", 200)
 if "user_level" not in st.session_state:
     st.session_state.user_level = raw_system_state.get("user_level", 1)
 if "unlocked_badges" not in st.session_state:
@@ -341,6 +356,7 @@ if current_today_key not in st.session_state.history_logs:
         "fat_g": 0,
         "fiber_g": 0,
         "sodium_mg": 0,
+        "potassium_mg": 0,
         "water_glasses": 0,
         "sleep_hours": 0.0,
         "entries": []
@@ -349,10 +365,10 @@ if current_today_key not in st.session_state.history_logs:
 active_day = st.session_state.history_logs[current_today_key]
 
 # ==============================================================================
-# SECTION 5: MATHEMATICAL CALCULATIONS (BMI, BMR, TDEE, BODY FAT)
+# SECTION 7: BIOMETRIC COMPUTATION ENGINES
 # ==============================================================================
 def compute_bmi(weight_kg, height_cm):
-    """Calculates Body Mass Index (BMI) and returns score + classification."""
+    """Calculates BMI and returns score + classification."""
     if height_cm <= 0:
         return 0.0, "Invalid Height"
     meters = height_cm / 100.0
@@ -390,7 +406,7 @@ def compute_bmr_mifflin_st_jeor(weight_kg, height_cm, age, gender):
         return int(10 * weight_kg + 6.25 * height_cm - 5 * age - 161)
 
 def compute_tdee(bmr, activity_level):
-    """Multiplies BMR by activity multiplier to estimate total daily energy expenditure."""
+    """Multiplies BMR by activity multiplier to estimate TDEE."""
     multipliers = {
         "Sedentary": 1.2,
         "Lightly Active": 1.375,
@@ -417,28 +433,28 @@ def grant_user_xp(points, context_message=""):
     commit_system_data()
 
 # ==============================================================================
-# SECTION 6: SIDEBAR CONTROL PANEL & PROFILE TELEMETRY
+# SECTION 8: SIDEBAR TELEMETRY CONTROL PANEL
 # ==============================================================================
 with st.sidebar:
     st.title("⚡ Control Center")
     st.caption(f"Profile: **{st.session_state.user_profile.get('name', 'Athlete Pro')}**")
     
-    # User XP & Level Card
+    # User Rank Progress
     st.markdown("### 🏆 Rank Telemetry")
     user_lvl = st.session_state.user_level
     user_xp = st.session_state.xp_points
     next_level_xp = user_lvl * 250
-    st.write(f"**Level {user_lvl} Fitness Enthusiast**")
+    st.write(f"**Level {user_lvl} Athlete**")
     st.progress(min(user_xp / next_level_xp, 1.0))
-    st.caption(f"Progress: **{user_xp}** / {next_level_xp} XP")
+    st.caption(f"XP Progress: **{user_xp}** / {next_level_xp}")
     
     st.divider()
     
-    # Biometric Summary Box
-    st.markdown("### 📐 Biometric Metrics")
-    w = st.session_state.user_profile.get("weight_kg", 75.0)
+    # Biometrics Summary
+    st.markdown("### 📐 Biometrics")
+    w = st.session_state.user_profile.get("weight_kg", 76.0)
     h = st.session_state.user_profile.get("height_cm", 178.0)
-    a = st.session_state.user_profile.get("age", 24)
+    a = st.session_state.user_profile.get("age", 25)
     g = st.session_state.user_profile.get("gender", "Male")
     act = st.session_state.user_profile.get("activity_level", "Moderately Active")
     
@@ -447,23 +463,23 @@ with st.sidebar:
     tdee_val = compute_tdee(bmr_val, act)
     
     st.write(f"• **BMI:** {bmi_val} ({bmi_cat})")
-    st.write(f"• **Basal Metabolic Rate:** {bmr_val} kcal")
-    st.write(f"• **Est. Maintenance (TDEE):** {tdee_val} kcal")
+    st.write(f"• **BMR:** {bmr_val} kcal")
+    st.write(f"• **Est. TDEE:** {tdee_val} kcal")
     
     st.divider()
     
-    # Daily Target Overrides
+    # Daily Active Target Overrides
     st.markdown("### 🎯 Active Goals")
-    c_target = st.session_state.user_profile.get("custom_cal_goal", 2300)
+    c_target = st.session_state.user_profile.get("custom_cal_goal", 2400)
     w_target = st.session_state.user_profile.get("custom_water_goal", 10)
-    st.write(f"• **Calorie Target:** {c_target} kcal")
-    st.write(f"• **Hydration Target:** {w_target} glasses")
-    st.write(f"• **Protein Target:** {st.session_state.user_profile.get('protein_goal_g', 160)}g")
+    st.write(f"• **Calorie Goal:** {c_target} kcal")
+    st.write(f"• **Water Goal:** {w_target} glasses")
+    st.write(f"• **Protein Goal:** {st.session_state.user_profile.get('protein_goal_g', 165)}g")
     
     st.divider()
     
-    # Quote of the Session
-    st.markdown("### 💬 Daily Inspiration")
+    # Inspiration Quote
+    st.markdown("### 💬 Inspiration")
     st.caption(MOTIVATIONAL_QUOTES[hash(current_today_key) % len(MOTIVATIONAL_QUOTES)])
     
     st.divider()
@@ -476,19 +492,20 @@ with st.sidebar:
             "fat_g": 0,
             "fiber_g": 0,
             "sodium_mg": 0,
+            "potassium_mg": 0,
             "water_glasses": 0,
             "sleep_hours": 0.0,
             "entries": []
         }
         commit_system_data()
-        st.toast("Today's telemetry reset!", icon="🧹")
+        st.toast("Today's log reset!", icon="🧹")
         st.rerun()
 
 # ==============================================================================
-# SECTION 7: MAIN HEADER & MULTI-TAB ARCHITECTURE
+# SECTION 9: APPLICATION TABS INTERFACE
 # ==============================================================================
 st.title("⚡ FitPulse Pro")
-st.caption("Enterprise-Grade Fitness, Macro-Nutrition, Telemetry & Biometrics Suite")
+st.caption("Enterprise Health, Nutrition & Biometrics Analytics Suite")
 
 app_tabs = st.tabs([
     "📊 Command Center", 
@@ -497,7 +514,7 @@ app_tabs = st.tabs([
     "🏋️ Workout & Lifting", 
     "💧 Hydration & Sleep", 
     "🏆 Badges & Ranks",
-    "📈 Analytics & Telemetry",
+    "📈 Analytics & History",
     "👤 Profile & Biometrics"
 ])
 
@@ -505,25 +522,25 @@ app_tabs = st.tabs([
 # TAB 1: LIVE COMMAND CENTER
 # ==============================================================================
 with app_tabs[0]:
-    st.markdown("<div class='section-header'>🔥 Real-Time Health Dashboard</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>🔥 Real-Time Dashboard</div>", unsafe_allow_html=True)
     
     c_eaten = active_day["calories_eaten"]
     c_burned = active_day["calories_burned"]
     net_cals = c_eaten - c_burned
-    target_cals = st.session_state.user_profile.get("custom_cal_goal", 2300)
+    target_cals = st.session_state.user_profile.get("custom_cal_goal", 2400)
     target_water = st.session_state.user_profile.get("custom_water_goal", 10)
     remaining_cals = target_cals - net_cals
 
-    # Top Metric Banner Cards
+    # Primary Cards
     m_col1, m_col2, m_col3, m_col4 = st.columns(4)
     m_col1.metric("Calories Consumed", f"{c_eaten} kcal", delta="Food Intake")
     m_col2.metric("Active Calorie Burn", f"{c_burned} kcal", delta="Workouts", delta_color="inverse")
     m_col3.metric("Net Calorie Balance", f"{net_cals} kcal", delta=f"{remaining_cals} remaining" if remaining_cals >= 0 else f"{abs(remaining_cals)} over limit")
-    m_col4.metric("Hydration Telemetry", f"{active_day['water_glasses']} / {target_water} 💧")
+    m_col4.metric("Hydration Intake", f"{active_day['water_glasses']} / {target_water} 💧")
 
     st.write("---")
 
-    # Visual Progress Section
+    # Progress Bars
     pr_col1, pr_col2 = st.columns(2)
     
     with pr_col1:
@@ -531,25 +548,25 @@ with app_tabs[0]:
             st.markdown("<div class='sub-header'>🎯 Daily Calorie Progress</div>", unsafe_allow_html=True)
             cal_ratio = min(c_eaten / target_cals, 1.0) if target_cals > 0 else 0.0
             st.progress(cal_ratio)
-            st.caption(f"**{int(cal_ratio * 100)}%** reached of your **{target_cals} kcal** target.")
+            st.caption(f"**{int(cal_ratio * 100)}%** reached of **{target_cals} kcal** target.")
 
     with pr_col2:
         with st.container(border=True):
-            st.markdown("<div class='sub-header'>💧 Hydration Tracker</div>", unsafe_allow_html=True)
+            st.markdown("<div class='sub-header'>💧 Hydration Goal Tracker</div>", unsafe_allow_html=True)
             w_ratio = min(active_day["water_glasses"] / target_water, 1.0) if target_water > 0 else 0.0
             st.progress(w_ratio)
             st.caption(f"Logged **{active_day['water_glasses']}** of **{target_water}** daily target glasses.")
 
     st.write("---")
 
-    # Macronutrient Overview Cards
+    # Macro Overview Cards
     st.markdown("<div class='section-header'>🥗 Macronutrient Telemetry</div>", unsafe_allow_html=True)
     mac1, mac2, mac3, mac4, mac5 = st.columns(5)
     
-    prot_target = st.session_state.user_profile.get("protein_goal_g", 160)
-    carb_target = st.session_state.user_profile.get("carbs_goal_g", 260)
+    prot_target = st.session_state.user_profile.get("protein_goal_g", 165)
+    carb_target = st.session_state.user_profile.get("carbs_goal_g", 270)
     fat_target = st.session_state.user_profile.get("fat_goal_g", 70)
-    fiber_target = st.session_state.user_profile.get("fiber_goal_g", 30)
+    fiber_target = st.session_state.user_profile.get("fiber_goal_g", 32)
     sodium_target = st.session_state.user_profile.get("sodium_goal_mg", 2300)
 
     mac1.metric("Protein", f"{active_day['protein_g']}g / {prot_target}g")
@@ -560,11 +577,11 @@ with app_tabs[0]:
 
     st.write("---")
 
-    # Lower Section: Chart Visualizer & Activity Feed
+    # Lower Section Visualizations
     chart_col, timeline_col = st.columns([2, 1])
     
     with chart_col:
-        st.subheader("📈 Energy Balance Visualizer")
+        st.subheader("📈 Energy Balance Chart")
         balance_df = pd.DataFrame({
             "Category": ["Food Consumed", "Calories Burned"],
             "Calories": [c_eaten, c_burned]
@@ -583,18 +600,18 @@ with app_tabs[0]:
 # TAB 2: NUTRITION & MACROS
 # ==============================================================================
 with app_tabs[1]:
-    st.markdown("<div class='section-header'>🍽️ Nutrition & Meal Logger</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>🍽️ Meal & Nutrition Logger</div>", unsafe_allow_html=True)
     
-    entry_method = st.radio("Choose Entry Mode:", ["Standard Database", "Custom Item Input", "Saved Recipes"], horizontal=True)
+    entry_method = st.radio("Choose Entry Method:", ["Standard Database Search", "Custom Manual Entry", "Saved Recipes"], horizontal=True)
     
     log_col1, log_col2 = st.columns([2, 1])
     
     with log_col1:
-        if entry_method == "Standard Database":
+        if entry_method == "Standard Database Search":
             with st.container(border=True):
-                st.markdown("<div class='sub-header'>🔎 Search Database</div>", unsafe_allow_html=True)
-                selected_food = st.selectbox("Select Food Item:", list(FOOD_LIBRARY.keys()))
-                serving_qty = st.number_input("Servings / Quantity Multiplier:", min_value=0.25, max_value=10.0, value=1.0, step=0.25)
+                st.markdown("<div class='sub-header'>🔎 Search Food Library</div>", unsafe_allow_html=True)
+                selected_food = st.selectbox("Select Item:", list(FOOD_LIBRARY.keys()))
+                serving_qty = st.number_input("Serving Multiplier:", min_value=0.25, max_value=10.0, value=1.0, step=0.25)
                 
                 f_data = FOOD_LIBRARY[selected_food]
                 calc_cals = int(f_data["cals"] * serving_qty)
@@ -603,16 +620,18 @@ with app_tabs[1]:
                 calc_f = int(f_data["f"] * serving_qty)
                 calc_fib = int(f_data["fiber"] * serving_qty)
                 calc_sod = int(f_data["sodium"] * serving_qty)
+                calc_pot = int(f_data.get("potassium", 0) * serving_qty)
                 
-                st.caption(f"Macros: **{calc_cals} kcal** | P: {calc_p}g | C: {calc_c}g | F: {calc_f}g | Fiber: {calc_fib}g | Sodium: {calc_sod}mg")
+                st.caption(f"Calculated Macros: **{calc_cals} kcal** | P: {calc_p}g | C: {calc_c}g | F: {calc_f}g | Fiber: {calc_fib}g | Sodium: {calc_sod}mg | Potassium: {calc_pot}mg")
                 
-                if st.button("➕ Log Food Entry", use_container_width=True):
+                if st.button("➕ Log Selected Food", use_container_width=True):
                     active_day["calories_eaten"] += calc_cals
                     active_day["protein_g"] += calc_p
                     active_day["carbs_g"] += calc_c
                     active_day["fat_g"] += calc_f
                     active_day["fiber_g"] += calc_fib
                     active_day["sodium_mg"] += calc_sod
+                    active_day["potassium_mg"] += calc_pot
                     
                     log_text = f"Logged: {selected_food} (x{serving_qty}) - {calc_cals} kcal"
                     active_day["entries"].append(log_text)
@@ -621,23 +640,23 @@ with app_tabs[1]:
                     st.toast(f"Logged {selected_food}!", icon="🥗")
                     st.rerun()
 
-        elif entry_method == "Custom Item Input":
+        elif entry_method == "Custom Manual Entry":
             with st.container(border=True):
-                st.markdown("<div class='sub-header'>✏️ Custom Meal Input</div>", unsafe_allow_html=True)
-                c_meal_name = st.text_input("Meal / Beverage Name:", placeholder="e.g. Protein Smoothie")
+                st.markdown("<div class='sub-header'>✏️ Manual Food Entry</div>", unsafe_allow_html=True)
+                c_meal_name = st.text_input("Meal / Item Name:", placeholder="e.g. Protein Smoothie")
                 
                 cc1, cc2, cc3 = st.columns(3)
                 with cc1:
-                    c_cals = st.number_input("Calories (kcal):", min_value=0, step=10, value=250)
-                    c_prot = st.number_input("Protein (g):", min_value=0, step=1, value=20)
+                    c_cals = st.number_input("Calories (kcal):", min_value=0, step=10, value=300)
+                    c_prot = st.number_input("Protein (g):", min_value=0, step=1, value=25)
                 with cc2:
-                    c_carbs = st.number_input("Carbohydrates (g):", min_value=0, step=1, value=30)
-                    c_fats = st.number_input("Fats (g):", min_value=0, step=1, value=5)
+                    c_carbs = st.number_input("Carbohydrates (g):", min_value=0, step=1, value=35)
+                    c_fats = st.number_input("Fats (g):", min_value=0, step=1, value=8)
                 with cc3:
-                    c_fiber = st.number_input("Fiber (g):", min_value=0, step=1, value=4)
-                    c_sod = st.number_input("Sodium (mg):", min_value=0, step=10, value=150)
+                    c_fiber = st.number_input("Fiber (g):", min_value=0, step=1, value=5)
+                    c_sod = st.number_input("Sodium (mg):", min_value=0, step=10, value=200)
                     
-                if st.button("➕ Log Custom Item", use_container_width=True):
+                if st.button("➕ Log Custom Entry", use_container_width=True):
                     if c_meal_name.strip():
                         active_day["calories_eaten"] += c_cals
                         active_day["protein_g"] += c_prot
@@ -653,7 +672,7 @@ with app_tabs[1]:
                         st.toast(f"Logged {c_meal_name}!", icon="🍔")
                         st.rerun()
                     else:
-                        st.warning("Please type an item name first!")
+                        st.warning("Please provide an item name!")
 
         else:
             with st.container(border=True):
@@ -677,34 +696,38 @@ with app_tabs[1]:
                         st.toast(f"Logged {chosen_recipe}!", icon="🍲")
                         st.rerun()
                 else:
-                    st.info("No custom recipes created yet. Use the 'Recipe Builder' tab!")
+                    st.info("No saved recipes yet. Create one in the 'Recipe Builder' tab!")
 
     with log_col2:
         with st.container(border=True):
-            st.markdown("<div class='sub-header'>📊 Today's Macro Distribution</div>", unsafe_allow_html=True)
-            p_val = active_day["protein_g"]
-            c_val = active_day["carbs_g"]
-            f_val = active_day["fat_g"]
+            st.markdown("<div class='sub-header'>📊 Today's Micronutrient Summary</div>", unsafe_allow_html=True)
             
             summary_table = pd.DataFrame({
-                "Nutrient": ["Protein (g)", "Carbs (g)", "Fats (g)", "Fiber (g)", "Sodium (mg)"],
-                "Amount": [p_val, c_val, f_val, active_day["fiber_g"], active_day["sodium_mg"]]
+                "Nutrient": ["Protein", "Carbs", "Fats", "Fiber", "Sodium", "Potassium"],
+                "Amount": [
+                    f"{active_day['protein_g']} g",
+                    f"{active_day['carbs_g']} g",
+                    f"{active_day['fat_g']} g",
+                    f"{active_day['fiber_g']} g",
+                    f"{active_day['sodium_mg']} mg",
+                    f"{active_day.get('potassium_mg', 0)} mg"
+                ]
             })
             st.dataframe(summary_table, use_container_width=True, hide_index=True)
 
 # ==============================================================================
-# TAB 3: RECIPE BUILDER
+# TAB 3: CUSTOM RECIPE BUILDER
 # ==============================================================================
 with app_tabs[2]:
-    st.markdown("<div class='section-header'>🍳 Custom Recipe Builder</div>", unsafe_allow_html=True)
-    st.caption("Combine ingredients from the database to calculate total meal macros and save for future quick-logging.")
+    st.markdown("<div class='section-header'>🍳 Custom Recipe & Meal Prep Builder</div>", unsafe_allow_html=True)
+    st.caption("Combine ingredients to automatically generate macros and store reusable custom meals.")
     
     rb_col1, rb_col2 = st.columns([2, 1])
     
     with rb_col1:
         with st.container(border=True):
             st.markdown("<div class='sub-header'>🛠️ Create New Recipe</div>", unsafe_allow_html=True)
-            recipe_title = st.text_input("Recipe Title:", placeholder="e.g. High-Protein Meal Prep Bowl")
+            recipe_title = st.text_input("Recipe Title:", placeholder="e.g. Chicken & Rice Prep Bowl")
             
             num_ingredients = st.number_input("Number of Ingredients:", min_value=1, max_value=8, value=3, step=1)
             
@@ -734,7 +757,7 @@ with app_tabs[2]:
             st.write(f"• **Calories:** {tot_rec_cals} kcal")
             st.write(f"• **Protein:** {tot_rec_p}g | **Carbs:** {tot_rec_c}g | **Fat:** {tot_rec_f}g")
             
-            if st.button("💾 Save Recipe", use_container_width=True):
+            if st.button("💾 Save Recipe to Library", use_container_width=True):
                 if recipe_title.strip():
                     st.session_state.custom_recipes[recipe_title] = {
                         "cals": tot_rec_cals,
@@ -747,11 +770,11 @@ with app_tabs[2]:
                     st.toast(f"Recipe '{recipe_title}' saved!", icon="💾")
                     st.rerun()
                 else:
-                    st.warning("Please enter a recipe title!")
+                    st.warning("Please provide a title for your recipe!")
 
     with rb_col2:
         with st.container(border=True):
-            st.markdown("<div class='sub-header'>📚 Saved Recipes Library</div>", unsafe_allow_html=True)
+            st.markdown("<div class='sub-header'>📚 Saved Recipe Library</div>", unsafe_allow_html=True)
             if st.session_state.custom_recipes:
                 for r_name, r_info in st.session_state.custom_recipes.items():
                     with st.expander(r_name):
@@ -761,33 +784,33 @@ with app_tabs[2]:
                         for ing in r_info["ingredients"]:
                             st.write(f"• {ing}")
             else:
-                st.caption("No custom recipes saved yet.")
+                st.caption("No custom recipes stored yet.")
 
 # ==============================================================================
-# TAB 4: WORKOUT & LIFTING STUDIO
+# TAB 4: WORKOUT & STRENGTH LOGGING
 # ==============================================================================
 with app_tabs[3]:
     st.markdown("<div class='section-header'>🏋️ Workout Studio & Strength Log</div>", unsafe_allow_html=True)
     
-    workout_mode = st.radio("Workout Tracker Mode:", ["MET Calorie Burn Calculator", "Strength Set & Rep Logger"], horizontal=True)
+    workout_mode = st.radio("Select Mode:", ["MET Calorie Burn Calculator", "Strength Set & Rep Logger"], horizontal=True)
     
     if workout_mode == "MET Calorie Burn Calculator":
-        ex_category = st.selectbox("Workout Category:", list(EXERCISE_MET_LIBRARY.keys()))
+        ex_category = st.selectbox("Category:", list(EXERCISE_MET_LIBRARY.keys()))
         
         w_col1, w_col2 = st.columns(2)
         
         with w_col1:
             with st.container(border=True):
                 st.markdown("<div class='sub-header'>⚡ MET Calorie Calculator</div>", unsafe_allow_html=True)
-                selected_ex = st.selectbox("Select Activity:", list(EXERCISE_MET_LIBRARY[ex_category].keys()))
+                selected_ex = st.selectbox("Activity:", list(EXERCISE_MET_LIBRARY[ex_category].keys()))
                 duration_minutes = st.number_input("Duration (Minutes):", min_value=5, max_value=300, value=30, step=5)
                 
-                u_weight = st.session_state.user_profile.get("weight_kg", 75.0)
+                u_weight = st.session_state.user_profile.get("weight_kg", 76.0)
                 met_value = EXERCISE_MET_LIBRARY[ex_category][selected_ex]
                 
                 est_burn = int((met_value * 3.5 * u_weight / 200) * duration_minutes)
                 
-                st.info(f"🔥 Estimated Burn: **{est_burn} kcal** ({duration_minutes} mins)")
+                st.info(f"🔥 Estimated Energy Burn: **{est_burn} kcal** ({duration_minutes} mins)")
                 
                 if st.button("🔥 Log Calorie Burn", use_container_width=True):
                     active_day["calories_burned"] += est_burn
@@ -800,18 +823,18 @@ with app_tabs[3]:
 
         with w_col2:
             with st.container(border=True):
-                st.markdown("<div class='sub-header'>✏️ Manual Exercise Input</div>", unsafe_allow_html=True)
-                custom_ex_name = st.text_input("Exercise Name:", placeholder="e.g. Heavy Deadlifts")
+                st.markdown("<div class='sub-header'>✏️ Manual Calorie Burn</div>", unsafe_allow_html=True)
+                custom_ex_name = st.text_input("Workout Title:", placeholder="e.g. Heavy Deadlifts")
                 custom_ex_burn = st.number_input("Calories Burned (kcal):", min_value=0, step=25, value=200)
                 
-                if st.button("🔥 Log Manual Workout", use_container_width=True):
+                if st.button("🔥 Log Manual Burn", use_container_width=True):
                     if custom_ex_burn > 0:
                         active_day["calories_burned"] += custom_ex_burn
                         label = custom_ex_name if custom_ex_name.strip() else "Workout"
                         entry_log_msg = f"Workout: {label} - {custom_ex_burn} kcal"
                         active_day["entries"].append(entry_log_msg)
                         
-                        grant_user_xp(25, "Logged Manual Exercise")
+                        grant_user_xp(25, "Logged Manual Workout")
                         st.toast(f"Logged {label}!", icon="🔥")
                         st.rerun()
 
@@ -822,8 +845,8 @@ with app_tabs[3]:
         with s_col1:
             with st.container(border=True):
                 exercise_title = st.text_input("Lift Name:", placeholder="e.g. Barbell Bench Press")
-                sets_count = st.number_input("Working Sets:", min_value=1, max_value=10, value=3)
-                reps_count = st.number_input("Reps Per Set:", min_value=1, max_value=50, value=10)
+                sets_count = st.number_input("Sets:", min_value=1, max_value=10, value=3)
+                reps_count = st.number_input("Reps:", min_value=1, max_value=50, value=10)
                 weight_lifted = st.number_input("Weight (kg):", min_value=0.0, max_value=500.0, value=60.0, step=2.5)
                 
                 if st.button("🏋️ Save Strength Entry", use_container_width=True):
@@ -853,16 +876,16 @@ with app_tabs[3]:
                     st.caption("No strength workouts recorded yet.")
 
 # ==============================================================================
-# TAB 5: HYDRATION & SLEEP TRACKER
+# TAB 5: HYDRATION & SLEEP RECOVERY
 # ==============================================================================
 with app_tabs[4]:
-    st.markdown("<div class='section-header'>💧 Hydration & Sleep Telemetry</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>💧 Hydration & Recovery Monitor</div>", unsafe_allow_html=True)
     
     wat_col1, wat_col2 = st.columns(2)
     
     with wat_col1:
         with st.container(border=True):
-            st.markdown("<div class='sub-header'>🥤 Fluid Intake</div>", unsafe_allow_html=True)
+            st.markdown("<div class='sub-header'>🥤 Fluid Intake Monitor</div>", unsafe_allow_html=True)
             st.markdown(f"## **{active_day['water_glasses']}** Glasses Logged Today")
             
             b1, b2 = st.columns(2)
@@ -889,12 +912,12 @@ with app_tabs[4]:
 
     with wat_col2:
         with st.container(border=True):
-            st.markdown("<div class='sub-header'>🌙 Sleep Tracker</div>", unsafe_allow_html=True)
+            st.markdown("<div class='sub-header'>🌙 Sleep Recovery Tracker</div>", unsafe_allow_html=True)
             st.markdown(f"## **{active_day.get('sleep_hours', 0.0)}** Hours Recorded")
             
             sleep_input = st.number_input("Log Sleep Duration (Hours):", min_value=0.0, max_value=16.0, value=7.5, step=0.5)
             
-            if st.button("🌙 Record Night's Sleep", use_container_width=True):
+            if st.button("🌙 Record Sleep", use_container_width=True):
                 active_day["sleep_hours"] = sleep_input
                 active_day["entries"].append(f"🌙 Slept for {sleep_input} hours")
                 
@@ -904,14 +927,14 @@ with app_tabs[4]:
                     
                 grant_user_xp(20, "Logged Sleep")
                 commit_system_data()
-                st.toast("Sleep record updated!", icon="😴")
+                st.toast("Sleep telemetry updated!", icon="😴")
                 st.rerun()
 
 # ==============================================================================
 # TAB 6: GAMIFICATION & BADGES
 # ==============================================================================
 with app_tabs[5]:
-    st.markdown("<div class='section-header'>🏆 Gamification & Ranks</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>🏆 Ranks & Achievements</div>", unsafe_allow_html=True)
     
     g_col1, g_col2 = st.columns([1, 2])
     
@@ -919,12 +942,12 @@ with app_tabs[5]:
         with st.container(border=True):
             st.markdown("<div class='sub-header'>👑 Level Status</div>", unsafe_allow_html=True)
             st.write(f"**Level {st.session_state.user_level} Athlete**")
-            st.write(f"**Total XP:** {st.session_state.xp_points} XP")
-            st.write(f"**Active Streak:** {st.session_state.streak_count} Days ⚡")
-            st.write(f"**Badges Unlocked:** {len(st.session_state.unlocked_badges)} / {len(GAMIFICATION_BADGES)}")
+            st.write(f"**Total XP Points:** {st.session_state.xp_points}")
+            st.write(f"**Streak:** {st.session_state.streak_count} Days ⚡")
+            st.write(f"**Badges:** {len(st.session_state.unlocked_badges)} / {len(GAMIFICATION_BADGES)}")
 
     with g_col2:
-        st.markdown("### 🏅 Achievement Badges")
+        st.markdown("### 🏅 Achievements Showcase")
         
         badge_cols = st.columns(2)
         idx = 0
@@ -953,16 +976,14 @@ with app_tabs[5]:
 # TAB 7: ADVANCED ANALYTICS & HISTORY
 # ==============================================================================
 with app_tabs[6]:
-    st.markdown("<div class='section-header'>📈 Multi-Day Analytics & Telemetry</div>", unsafe_allow_html=True)
-    
-    st.markdown("### 📅 Weekly Performance Simulation")
+    st.markdown("<div class='section-header'>📈 Analytics & Historical Trends</div>", unsafe_allow_html=True)
     
     trend_dates = [(datetime.date.today() - datetime.timedelta(days=i)).strftime("%a %d") for i in range(6, -1, -1)]
     
     analytics_df = pd.DataFrame({
         "Day": trend_dates,
-        "Calories Consumed": [2100, 2250, 1900, 2300, 2050, 2150, active_day["calories_eaten"]],
-        "Calories Burned": [350, 400, 250, 500, 300, 450, active_day["calories_burned"]],
+        "Calories Consumed": [2150, 2300, 1950, 2400, 2100, 2250, active_day["calories_eaten"]],
+        "Calories Burned": [350, 420, 280, 510, 320, 480, active_day["calories_burned"]],
         "Water Glasses": [8, 9, 7, 10, 8, 9, active_day["water_glasses"]],
         "Sleep Hours": [7.5, 8.0, 6.5, 8.5, 7.0, 8.0, active_day.get("sleep_hours", 7.0)]
     })
@@ -971,7 +992,7 @@ with app_tabs[6]:
     
     c_chart1, c_chart2 = st.columns(2)
     with c_chart1:
-        st.caption("Daily Water Intake (Glasses)")
+        st.caption("Daily Hydration Intake (Glasses)")
         st.bar_chart(analytics_df, x="Day", y="Water Glasses")
     with c_chart2:
         st.caption("Daily Sleep Duration (Hours)")
@@ -979,10 +1000,10 @@ with app_tabs[6]:
     
     st.divider()
     
-    st.markdown("### 📄 Export Telemetry Report")
+    st.markdown("### 📄 Export Data")
     csv_bytes = analytics_df.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Download Historical Report (CSV)",
+        label="📥 Download Telemetry Report (CSV)",
         data=csv_bytes,
         file_name="fitpulse_analytics_report.csv",
         mime="text/csv",
@@ -990,44 +1011,44 @@ with app_tabs[6]:
     )
 
 # ==============================================================================
-# TAB 8: USER PROFILE & BIOMETRICS ENGINE
+# TAB 8: USER PROFILE & GOALS ENGINE
 # ==============================================================================
 with app_tabs[7]:
-    st.markdown("<div class='section-header'>👤 Profile, Goals & Biometrics Engine</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>👤 Profile, Biometrics & Target Configuration</div>", unsafe_allow_html=True)
     
     p_data = st.session_state.user_profile
     
-    with st.form("enterprise_profile_form"):
+    with st.form("profile_configuration_form"):
         pf_col1, pf_col2 = st.columns(2)
         
         with pf_col1:
-            st.markdown("<div class='sub-header'>📋 Personal Information</div>", unsafe_allow_html=True)
+            st.markdown("<div class='sub-header'>📋 Personal Details</div>", unsafe_allow_html=True)
             in_name = st.text_input("Name:", value=p_data.get("name", "Athlete Pro"))
-            in_age = st.number_input("Age:", min_value=12, max_value=100, value=p_data.get("age", 24))
+            in_age = st.number_input("Age:", min_value=12, max_value=100, value=p_data.get("age", 25))
             in_gender = st.selectbox("Gender:", ["Male", "Female"], index=0 if p_data.get("gender") == "Male" else 1)
-            in_weight = st.number_input("Weight (kg):", min_value=30.0, max_value=250.0, value=p_data.get("weight_kg", 75.0), step=0.5)
+            in_weight = st.number_input("Weight (kg):", min_value=30.0, max_value=250.0, value=p_data.get("weight_kg", 76.0), step=0.5)
             in_height = st.number_input("Height (cm):", min_value=100.0, max_value=230.0, value=p_data.get("height_cm", 178.0), step=1.0)
             in_activity = st.selectbox("Activity Level:", ["Sedentary", "Lightly Active", "Moderately Active", "Very Active", "Extra Active"], index=2)
             
         with pf_col2:
             st.markdown("<div class='sub-header'>🎯 Daily Targets</div>", unsafe_allow_html=True)
-            in_cal_goal = st.number_input("Calorie Target (kcal):", min_value=1000, max_value=6000, value=p_data.get("custom_cal_goal", 2300), step=50)
-            in_water_goal = st.number_input("Water Target (Glasses):", min_value=4, max_value=25, value=p_data.get("custom_water_goal", 10), step=1)
-            in_prot_goal = st.number_input("Protein Target (g):", min_value=20, max_value=400, value=p_data.get("protein_goal_g", 160), step=5)
-            in_carb_goal = st.number_input("Carbs Target (g):", min_value=20, max_value=600, value=p_data.get("carbs_goal_g", 260), step=5)
-            in_fat_goal = st.number_input("Fat Target (g):", min_value=10, max_value=200, value=p_data.get("fat_goal_g", 70), step=5)
-            in_fiber_goal = st.number_input("Fiber Target (g):", min_value=10, max_value=100, value=p_data.get("fiber_goal_g", 30), step=2)
+            in_cal_goal = st.number_input("Calorie Goal (kcal):", min_value=1000, max_value=6000, value=p_data.get("custom_cal_goal", 2400), step=50)
+            in_water_goal = st.number_input("Water Goal (Glasses):", min_value=4, max_value=25, value=p_data.get("custom_water_goal", 10), step=1)
+            in_prot_goal = st.number_input("Protein Goal (g):", min_value=20, max_value=400, value=p_data.get("protein_goal_g", 165), step=5)
+            in_carb_goal = st.number_input("Carbs Goal (g):", min_value=20, max_value=600, value=p_data.get("carbs_goal_g", 270), step=5)
+            in_fat_goal = st.number_input("Fat Goal (g):", min_value=10, max_value=200, value=p_data.get("fat_goal_g", 70), step=5)
+            in_fiber_goal = st.number_input("Fiber Goal (g):", min_value=10, max_value=100, value=p_data.get("fiber_goal_g", 32), step=2)
             
         st.markdown("<div class='sub-header'>📏 Circumference Measurements (Navy Body Fat Calculator)</div>", unsafe_allow_html=True)
         m_c1, m_c2, m_c3 = st.columns(3)
         with m_c1:
             in_neck = st.number_input("Neck Circumference (cm):", min_value=20.0, max_value=70.0, value=p_data.get("neck_cm", 38.0), step=0.5)
         with m_c2:
-            in_waist = st.number_input("Waist Circumference (cm):", min_value=40.0, max_value=200.0, value=p_data.get("waist_cm", 82.0), step=0.5)
+            in_waist = st.number_input("Waist Circumference (cm):", min_value=40.0, max_value=200.0, value=p_data.get("waist_cm", 81.0), step=0.5)
         with m_c3:
             in_hip = st.number_input("Hip Circumference (cm - Females):", min_value=40.0, max_value=200.0, value=p_data.get("hip_cm", 95.0), step=0.5)
 
-        save_btn = st.form_submit_button("💾 Save All Profile & Goal Changes", use_container_width=True)
+        save_btn = st.form_submit_button("💾 Save Profile Configuration", use_container_width=True)
         
         if save_btn:
             st.session_state.user_profile = {
@@ -1044,18 +1065,18 @@ with app_tabs[7]:
                 "fat_goal_g": in_fat_goal,
                 "fiber_goal_g": in_fiber_goal,
                 "sodium_goal_mg": p_data.get("sodium_goal_mg", 2300),
+                "potassium_goal_mg": p_data.get("potassium_goal_mg", 3500),
                 "neck_cm": in_neck,
                 "waist_cm": in_waist,
                 "hip_cm": in_hip
             }
             commit_system_data()
-            st.toast("Profile settings updated successfully!", icon="✅")
+            st.toast("Profile settings updated!", icon="✅")
             st.rerun()
 
-    # Body Fat Analysis Box
     navy_bf = compute_navy_body_fat(
         st.session_state.user_profile.get("gender", "Male"),
-        st.session_state.user_profile.get("waist_cm", 82.0),
+        st.session_state.user_profile.get("waist_cm", 81.0),
         st.session_state.user_profile.get("neck_cm", 38.0),
         st.session_state.user_profile.get("height_cm", 178.0),
         st.session_state.user_profile.get("hip_cm", 95.0)
@@ -1063,6 +1084,6 @@ with app_tabs[7]:
     st.info(f"📊 **US Navy Estimated Body Fat Percentage:** {navy_bf}%")
 
 # ==============================================================================
-# SECTION 8: AUTOMATIC STATE PERSISTENCE
+# SECTION 10: AUTO-PERSISTENCE
 # ==============================================================================
 commit_system_data()
