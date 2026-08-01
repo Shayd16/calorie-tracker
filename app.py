@@ -96,12 +96,13 @@ st.markdown("""
 
     /* Badge Displays */
     .badge-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         padding: 14px;
         border-radius: 10px;
         text-align: center;
         margin-bottom: 12px;
+        min-height: 120px;
     }
     .badge-card-unlocked {
         background: rgba(0, 230, 118, 0.1);
@@ -110,6 +111,7 @@ st.markdown("""
         border-radius: 10px;
         text-align: center;
         margin-bottom: 12px;
+        min-height: 120px;
     }
 
     /* Override Streamlit Accent Color */
@@ -152,7 +154,7 @@ def initialize_default_system_state():
         "last_active_date": str(datetime.date.today()),
         "xp_points": 200,
         "user_level": 1,
-        "unlocked_badges": ["First Step", "Hydration Starter"],
+        "unlocked_badges": ["Streak Legend 1D", "Hydration Master 8G", "Rank Veteran Lvl 1"],
         "custom_recipes": {},
         "strength_workouts": [],
         "daily_logs": {}
@@ -300,10 +302,6 @@ EXERCISE_MET_LIBRARY = {
 }
 
 # ==============================================================================
-# SECTION 5: GAMIFICATION BADGES
-# ==============================================================================
-GAMIFICATION_BADGES = {
- # ==============================================================================
 # SECTION 5: DYNAMIC 100+ GAMIFICATION BADGE SYSTEM
 # ==============================================================================
 def generate_badge_database():
@@ -384,7 +382,6 @@ def generate_badge_database():
     return badges
 
 GAMIFICATION_BADGES = generate_badge_database()
-}
 
 MOTIVATIONAL_QUOTES = [
     "“Action is the foundational key to all success.” — Pablo Picasso",
@@ -398,68 +395,44 @@ MOTIVATIONAL_QUOTES = [
 # ==============================================================================
 # SECTION 6: SESSION STATE ENGINE
 # ==============================================================================
-# ==============================================================================
-# TAB 6: GAMIFICATION & 100+ BADGES SHOWCASE
-# ==============================================================================
-with app_tabs[5]:
-    st.markdown("<div class='section-header'>🏆 Ranks & Achievements</div>", unsafe_allow_html=True)
-    
-    g_col1, g_col2 = st.columns([1, 3])
-    
-    with g_col1:
-        with st.container(border=True):
-            st.markdown("<div class='sub-header'>👑 Rank Telemetry</div>", unsafe_allow_html=True)
-            st.write(f"**Level {st.session_state.user_level} Athlete**")
-            st.write(f"**Total XP:** {st.session_state.xp_points}")
-            st.write(f"**Current Streak:** {st.session_state.streak_count} Days ⚡")
-            
-            unlocked_cnt = len(st.session_state.unlocked_badges)
-            total_cnt = len(GAMIFICATION_BADGES)
-            st.write(f"**Badges Unlocked:** {unlocked_cnt} / {total_cnt}")
-            st.progress(unlocked_cnt / total_cnt)
+raw_system_state = load_system_data()
 
-    with g_col2:
-        st.markdown("### 🏅 Achievements Showcase (100+ Badges)")
-        
-        # Category Filter Bar
-        categories = ["All"] + sorted(list(set(b["category"] for b in GAMIFICATION_BADGES.values())))
-        selected_cat = st.selectbox("Filter Badges by Category:", categories)
-        
-        search_query = st.text_input("🔎 Search Badges:", placeholder="e.g. 100 kcal, Hydration, Streak")
-        
-        # Filter Logic
-        filtered_badges = {}
-        for b_name, b_data in GAMIFICATION_BADGES.items():
-            matches_cat = (selected_cat == "All") or (b_data["category"] == selected_cat)
-            matches_search = (search_query.lower() in b_name.lower()) or (search_query.lower() in b_data["desc"].lower())
-            if matches_cat and matches_search:
-                filtered_badges[b_name] = b_data
+if "user_profile" not in st.session_state:
+    st.session_state.user_profile = raw_system_state.get("profile", {})
+if "streak_count" not in st.session_state:
+    st.session_state.streak_count = raw_system_state.get("streak_count", 1)
+if "xp_points" not in st.session_state:
+    st.session_state.xp_points = raw_system_state.get("xp_points", 200)
+if "user_level" not in st.session_state:
+    st.session_state.user_level = raw_system_state.get("user_level", 1)
+if "unlocked_badges" not in st.session_state:
+    st.session_state.unlocked_badges = raw_system_state.get("unlocked_badges", ["Streak Legend 1D", "Hydration Master 8G", "Rank Veteran Lvl 1"])
+if "custom_recipes" not in st.session_state:
+    st.session_state.custom_recipes = raw_system_state.get("custom_recipes", {})
+if "strength_workouts" not in st.session_state:
+    st.session_state.strength_workouts = raw_system_state.get("strength_workouts", [])
+if "history_logs" not in st.session_state:
+    st.session_state.history_logs = raw_system_state.get("daily_logs", {})
 
-        st.caption(f"Showing **{len(filtered_badges)}** badges")
-        
-        # Render Badges in 3 Grid Columns
-        badge_cols = st.columns(3)
-        for idx, (b_title, b_info) in enumerate(filtered_badges.items()):
-            col_target = badge_cols[idx % 3]
-            is_unlocked = b_title in st.session_state.unlocked_badges
-            
-            with col_target:
-                if is_unlocked:
-                    st.markdown(f"""
-                        <div class='badge-card-unlocked'>
-                            <h4>{b_info['icon']} {b_title}</h4>
-                            <p style='font-size:0.85rem;'>{b_info['desc']}</p>
-                            <small><b>✅ UNLOCKED</b></small>
-                        </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                        <div class='badge-card'>
-                            <h4>🔒 {b_title}</h4>
-                            <p style='font-size:0.85rem; color:#888;'>{b_info['desc']}</p>
-                            <small style='color:#666;'>LOCKED</small>
-                        </div>
-                    """, unsafe_allow_html=True)
+current_today_key = str(datetime.date.today())
+
+if current_today_key not in st.session_state.history_logs:
+    st.session_state.history_logs[current_today_key] = {
+        "calories_eaten": 0,
+        "calories_burned": 0,
+        "protein_g": 0,
+        "carbs_g": 0,
+        "fat_g": 0,
+        "fiber_g": 0,
+        "sodium_mg": 0,
+        "potassium_mg": 0,
+        "water_glasses": 0,
+        "sleep_hours": 0.0,
+        "entries": []
+    }
+
+active_day = st.session_state.history_logs[current_today_key]
+
 # ==============================================================================
 # SECTION 7: BIOMETRIC COMPUTATION ENGINES
 # ==============================================================================
@@ -522,10 +495,6 @@ def grant_user_xp(points, context_message=""):
         st.balloons()
         st.toast(f"🎉 LEVEL UP! You reached Level {st.session_state.user_level}!", icon="🏆")
         
-    if "Centurion" not in st.session_state.unlocked_badges and st.session_state.xp_points >= 1000:
-        st.session_state.unlocked_badges.append("Centurion")
-        st.toast("🏅 Unlocked Badge: Centurion!", icon="👑")
-        
     commit_system_data()
 
 # ==============================================================================
@@ -579,7 +548,7 @@ with st.sidebar:
     st.caption(MOTIVATIONAL_QUOTES[hash(current_today_key) % len(MOTIVATIONAL_QUOTES)])
     
     st.divider()
-    if st.button("🔄 Reset Today's Log", use_container_width=True):
+    if st.button("🔄 Reset Today's Log", use_container_width=True, key="reset_today_btn"):
         st.session_state.history_logs[current_today_key] = {
             "calories_eaten": 0,
             "calories_burned": 0,
@@ -698,7 +667,7 @@ with app_tabs[0]:
 with app_tabs[1]:
     st.markdown("<div class='section-header'>🍽️ Meal & Nutrition Logger</div>", unsafe_allow_html=True)
     
-    entry_method = st.radio("Choose Entry Method:", ["Standard Database Search", "Custom Manual Entry", "Saved Recipes"], horizontal=True)
+    entry_method = st.radio("Choose Entry Method:", ["Standard Database Search", "Custom Manual Entry", "Saved Recipes"], horizontal=True, key="entry_method_radio")
     
     log_col1, log_col2 = st.columns([2, 1])
     
@@ -706,8 +675,8 @@ with app_tabs[1]:
         if entry_method == "Standard Database Search":
             with st.container(border=True):
                 st.markdown("<div class='sub-header'>🔎 Search Food Library</div>", unsafe_allow_html=True)
-                selected_food = st.selectbox("Select Item:", list(FOOD_LIBRARY.keys()))
-                serving_qty = st.number_input("Serving Multiplier:", min_value=0.25, max_value=10.0, value=1.0, step=0.25)
+                selected_food = st.selectbox("Select Item:", list(FOOD_LIBRARY.keys()), key="select_food_library")
+                serving_qty = st.number_input("Serving Multiplier:", min_value=0.25, max_value=10.0, value=1.0, step=0.25, key="food_serving_qty")
                 
                 f_data = FOOD_LIBRARY[selected_food]
                 calc_cals = int(f_data["cals"] * serving_qty)
@@ -720,7 +689,7 @@ with app_tabs[1]:
                 
                 st.caption(f"Calculated Macros: **{calc_cals} kcal** | P: {calc_p}g | C: {calc_c}g | F: {calc_f}g | Fiber: {calc_fib}g | Sodium: {calc_sod}mg | Potassium: {calc_pot}mg")
                 
-                if st.button("➕ Log Selected Food", use_container_width=True):
+                if st.button("➕ Log Selected Food", use_container_width=True, key="btn_log_selected_food"):
                     active_day["calories_eaten"] += calc_cals
                     active_day["protein_g"] += calc_p
                     active_day["carbs_g"] += calc_c
@@ -739,20 +708,20 @@ with app_tabs[1]:
         elif entry_method == "Custom Manual Entry":
             with st.container(border=True):
                 st.markdown("<div class='sub-header'>✏️ Manual Food Entry</div>", unsafe_allow_html=True)
-                c_meal_name = st.text_input("Meal / Item Name:", placeholder="e.g. Protein Smoothie")
+                c_meal_name = st.text_input("Meal / Item Name:", placeholder="e.g. Protein Smoothie", key="custom_meal_name_input")
                 
                 cc1, cc2, cc3 = st.columns(3)
                 with cc1:
-                    c_cals = st.number_input("Calories (kcal):", min_value=0, step=10, value=300)
-                    c_prot = st.number_input("Protein (g):", min_value=0, step=1, value=25)
+                    c_cals = st.number_input("Calories (kcal):", min_value=0, step=10, value=300, key="custom_cals_input")
+                    c_prot = st.number_input("Protein (g):", min_value=0, step=1, value=25, key="custom_prot_input")
                 with cc2:
-                    c_carbs = st.number_input("Carbohydrates (g):", min_value=0, step=1, value=35)
-                    c_fats = st.number_input("Fats (g):", min_value=0, step=1, value=8)
+                    c_carbs = st.number_input("Carbohydrates (g):", min_value=0, step=1, value=35, key="custom_carbs_input")
+                    c_fats = st.number_input("Fats (g):", min_value=0, step=1, value=8, key="custom_fats_input")
                 with cc3:
-                    c_fiber = st.number_input("Fiber (g):", min_value=0, step=1, value=5)
-                    c_sod = st.number_input("Sodium (mg):", min_value=0, step=10, value=200)
+                    c_fiber = st.number_input("Fiber (g):", min_value=0, step=1, value=5, key="custom_fiber_input")
+                    c_sod = st.number_input("Sodium (mg):", min_value=0, step=10, value=200, key="custom_sod_input")
                     
-                if st.button("➕ Log Custom Entry", use_container_width=True):
+                if st.button("➕ Log Custom Entry", use_container_width=True, key="btn_log_custom_entry"):
                     if c_meal_name.strip():
                         active_day["calories_eaten"] += c_cals
                         active_day["protein_g"] += c_prot
@@ -774,12 +743,12 @@ with app_tabs[1]:
             with st.container(border=True):
                 st.markdown("<div class='sub-header'>📖 Saved Custom Recipes</div>", unsafe_allow_html=True)
                 if st.session_state.custom_recipes:
-                    chosen_recipe = st.selectbox("Select Recipe:", list(st.session_state.custom_recipes.keys()))
+                    chosen_recipe = st.selectbox("Select Recipe:", list(st.session_state.custom_recipes.keys()), key="select_custom_recipe")
                     recipe_data = st.session_state.custom_recipes[chosen_recipe]
                     
                     st.caption(f"Recipe Totals: **{recipe_data['cals']} kcal** | P: {recipe_data['p']}g | C: {recipe_data['c']}g | F: {recipe_data['f']}g")
                     
-                    if st.button("➕ Log Recipe to Daily Feed", use_container_width=True):
+                    if st.button("➕ Log Recipe to Daily Feed", use_container_width=True, key="btn_log_recipe"):
                         active_day["calories_eaten"] += recipe_data["cals"]
                         active_day["protein_g"] += recipe_data["p"]
                         active_day["carbs_g"] += recipe_data["c"]
@@ -823,9 +792,9 @@ with app_tabs[2]:
     with rb_col1:
         with st.container(border=True):
             st.markdown("<div class='sub-header'>🛠️ Create New Recipe</div>", unsafe_allow_html=True)
-            recipe_title = st.text_input("Recipe Title:", placeholder="e.g. Chicken & Rice Prep Bowl")
+            recipe_title = st.text_input("Recipe Title:", placeholder="e.g. Chicken & Rice Prep Bowl", key="recipe_title_input")
             
-            num_ingredients = st.number_input("Number of Ingredients:", min_value=1, max_value=8, value=3, step=1)
+            num_ingredients = st.number_input("Number of Ingredients:", min_value=1, max_value=8, value=3, step=1, key="num_ingredients_input")
             
             recipe_ingredients = []
             tot_rec_cals = 0
@@ -853,7 +822,7 @@ with app_tabs[2]:
             st.write(f"• **Calories:** {tot_rec_cals} kcal")
             st.write(f"• **Protein:** {tot_rec_p}g | **Carbs:** {tot_rec_c}g | **Fat:** {tot_rec_f}g")
             
-            if st.button("💾 Save Recipe to Library", use_container_width=True):
+            if st.button("💾 Save Recipe to Library", use_container_width=True, key="btn_save_recipe"):
                 if recipe_title.strip():
                     st.session_state.custom_recipes[recipe_title] = {
                         "cals": tot_rec_cals,
@@ -888,18 +857,18 @@ with app_tabs[2]:
 with app_tabs[3]:
     st.markdown("<div class='section-header'>🏋️ Workout Studio & Strength Log</div>", unsafe_allow_html=True)
     
-    workout_mode = st.radio("Select Mode:", ["MET Calorie Burn Calculator", "Strength Set & Rep Logger"], horizontal=True)
+    workout_mode = st.radio("Select Mode:", ["MET Calorie Burn Calculator", "Strength Set & Rep Logger"], horizontal=True, key="workout_mode_radio")
     
     if workout_mode == "MET Calorie Burn Calculator":
-        ex_category = st.selectbox("Category:", list(EXERCISE_MET_LIBRARY.keys()))
+        ex_category = st.selectbox("Category:", list(EXERCISE_MET_LIBRARY.keys()), key="met_category_select")
         
         w_col1, w_col2 = st.columns(2)
         
         with w_col1:
             with st.container(border=True):
                 st.markdown("<div class='sub-header'>⚡ MET Calorie Calculator</div>", unsafe_allow_html=True)
-                selected_ex = st.selectbox("Activity:", list(EXERCISE_MET_LIBRARY[ex_category].keys()))
-                duration_minutes = st.number_input("Duration (Minutes):", min_value=5, max_value=300, value=30, step=5)
+                selected_ex = st.selectbox("Activity:", list(EXERCISE_MET_LIBRARY[ex_category].keys()), key="met_activity_select")
+                duration_minutes = st.number_input("Duration (Minutes):", min_value=5, max_value=300, value=30, step=5, key="met_duration_input")
                 
                 u_weight = st.session_state.user_profile.get("weight_kg", 76.0)
                 met_value = EXERCISE_MET_LIBRARY[ex_category][selected_ex]
@@ -908,7 +877,7 @@ with app_tabs[3]:
                 
                 st.info(f"🔥 Estimated Energy Burn: **{est_burn} kcal** ({duration_minutes} mins)")
                 
-                if st.button("🔥 Log Calorie Burn", use_container_width=True):
+                if st.button("🔥 Log Calorie Burn", use_container_width=True, key="btn_log_met_burn"):
                     active_day["calories_burned"] += est_burn
                     entry_log_msg = f"Workout ({ex_category}): {selected_ex} ({duration_minutes} mins) - {est_burn} kcal"
                     active_day["entries"].append(entry_log_msg)
@@ -920,10 +889,10 @@ with app_tabs[3]:
         with w_col2:
             with st.container(border=True):
                 st.markdown("<div class='sub-header'>✏️ Manual Calorie Burn</div>", unsafe_allow_html=True)
-                custom_ex_name = st.text_input("Workout Title:", placeholder="e.g. Heavy Deadlifts")
-                custom_ex_burn = st.number_input("Calories Burned (kcal):", min_value=0, step=25, value=200)
+                custom_ex_name = st.text_input("Workout Title:", placeholder="e.g. Heavy Deadlifts", key="custom_ex_name_input")
+                custom_ex_burn = st.number_input("Calories Burned (kcal):", min_value=0, step=25, value=200, key="custom_ex_burn_input")
                 
-                if st.button("🔥 Log Manual Burn", use_container_width=True):
+                if st.button("🔥 Log Manual Burn", use_container_width=True, key="btn_log_manual_burn"):
                     if custom_ex_burn > 0:
                         active_day["calories_burned"] += custom_ex_burn
                         label = custom_ex_name if custom_ex_name.strip() else "Workout"
@@ -940,12 +909,12 @@ with app_tabs[3]:
         
         with s_col1:
             with st.container(border=True):
-                exercise_title = st.text_input("Lift Name:", placeholder="e.g. Barbell Bench Press")
-                sets_count = st.number_input("Sets:", min_value=1, max_value=10, value=3)
-                reps_count = st.number_input("Reps:", min_value=1, max_value=50, value=10)
-                weight_lifted = st.number_input("Weight (kg):", min_value=0.0, max_value=500.0, value=60.0, step=2.5)
+                exercise_title = st.text_input("Lift Name:", placeholder="e.g. Barbell Bench Press", key="lift_title_input")
+                sets_count = st.number_input("Sets:", min_value=1, max_value=10, value=3, key="lift_sets_input")
+                reps_count = st.number_input("Reps:", min_value=1, max_value=50, value=10, key="lift_reps_input")
+                weight_lifted = st.number_input("Weight (kg):", min_value=0.0, max_value=500.0, value=60.0, step=2.5, key="lift_weight_input")
                 
-                if st.button("🏋️ Save Strength Entry", use_container_width=True):
+                if st.button("🏋️ Save Strength Entry", use_container_width=True, key="btn_save_strength_entry"):
                     if exercise_title.strip():
                         lift_entry = {
                             "date": current_today_key,
@@ -986,21 +955,21 @@ with app_tabs[4]:
             
             b1, b2 = st.columns(2)
             with b1:
-                if st.button("🥤 +1 Glass (250 ml)", use_container_width=True):
+                if st.button("🥤 +1 Glass (250 ml)", use_container_width=True, key="btn_add_1_water"):
                     active_day["water_glasses"] += 1
                     active_day["entries"].append("💧 Drank 1 glass of water (250 ml)")
                     grant_user_xp(5, "Water Intake")
                     commit_system_data()
                     st.rerun()
             with b2:
-                if st.button("🥤 +2 Glasses (500 ml)", use_container_width=True):
+                if st.button("🥤 +2 Glasses (500 ml)", use_container_width=True, key="btn_add_2_water"):
                     active_day["water_glasses"] += 2
                     active_day["entries"].append("💧 Drank 2 glasses of water (500 ml)")
                     grant_user_xp(10, "Water Intake")
                     commit_system_data()
                     st.rerun()
                     
-            if st.button("➖ Remove 1 Glass", use_container_width=True):
+            if st.button("➖ Remove 1 Glass", use_container_width=True, key="btn_sub_1_water"):
                 if active_day["water_glasses"] > 0:
                     active_day["water_glasses"] -= 1
                     commit_system_data()
@@ -1011,62 +980,79 @@ with app_tabs[4]:
             st.markdown("<div class='sub-header'>🌙 Sleep Recovery Tracker</div>", unsafe_allow_html=True)
             st.markdown(f"## **{active_day.get('sleep_hours', 0.0)}** Hours Recorded")
             
-            sleep_input = st.number_input("Log Sleep Duration (Hours):", min_value=0.0, max_value=16.0, value=7.5, step=0.5)
+            sleep_input = st.number_input("Log Sleep Duration (Hours):", min_value=0.0, max_value=16.0, value=7.5, step=0.5, key="sleep_hours_input")
             
-            if st.button("🌙 Record Sleep", use_container_width=True):
+            if st.button("🌙 Record Sleep", use_container_width=True, key="btn_record_sleep"):
                 active_day["sleep_hours"] = sleep_input
                 active_day["entries"].append(f"🌙 Slept for {sleep_input} hours")
                 
-                if sleep_input >= 8.0 and "Sleep Guardian" not in st.session_state.unlocked_badges:
-                    st.session_state.unlocked_badges.append("Sleep Guardian")
-                    st.toast("🏅 Badge Unlocked: Sleep Guardian!", icon="🌙")
-                    
                 grant_user_xp(20, "Logged Sleep")
                 commit_system_data()
                 st.toast("Sleep telemetry updated!", icon="😴")
                 st.rerun()
 
 # ==============================================================================
-# TAB 6: GAMIFICATION & BADGES
+# TAB 6: GAMIFICATION & 100+ BADGES SHOWCASE
 # ==============================================================================
 with app_tabs[5]:
     st.markdown("<div class='section-header'>🏆 Ranks & Achievements</div>", unsafe_allow_html=True)
     
-    g_col1, g_col2 = st.columns([1, 2])
+    g_col1, g_col2 = st.columns([1, 3])
     
     with g_col1:
         with st.container(border=True):
-            st.markdown("<div class='sub-header'>👑 Level Status</div>", unsafe_allow_html=True)
+            st.markdown("<div class='sub-header'>👑 Rank Telemetry</div>", unsafe_allow_html=True)
             st.write(f"**Level {st.session_state.user_level} Athlete**")
-            st.write(f"**Total XP Points:** {st.session_state.xp_points}")
-            st.write(f"**Streak:** {st.session_state.streak_count} Days ⚡")
-            st.write(f"**Badges:** {len(st.session_state.unlocked_badges)} / {len(GAMIFICATION_BADGES)}")
+            st.write(f"**Total XP:** {st.session_state.xp_points}")
+            st.write(f"**Current Streak:** {st.session_state.streak_count} Days ⚡")
+            
+            unlocked_cnt = len(st.session_state.unlocked_badges)
+            total_cnt = len(GAMIFICATION_BADGES)
+            st.write(f"**Badges Unlocked:** {unlocked_cnt} / {total_cnt}")
+            st.progress(min(unlocked_cnt / total_cnt, 1.0))
 
     with g_col2:
-        st.markdown("### 🏅 Achievements Showcase")
+        st.markdown("### 🏅 Achievements Showcase (100+ Badges)")
         
-        badge_cols = st.columns(2)
-        idx = 0
-        for b_title, b_info in GAMIFICATION_BADGES.items():
-            col_target = badge_cols[idx % 2]
+        # Category Filter Bar
+        categories = ["All"] + sorted(list(set(b["category"] for b in GAMIFICATION_BADGES.values())))
+        selected_cat = st.selectbox("Filter Badges by Category:", categories, key="badge_category_filter")
+        
+        search_query = st.text_input("🔎 Search Badges:", placeholder="e.g. 100 kcal, Hydration, Streak", key="badge_search_input")
+        
+        # Filter Logic
+        filtered_badges = {}
+        for b_name, b_data in GAMIFICATION_BADGES.items():
+            matches_cat = (selected_cat == "All") or (b_data["category"] == selected_cat)
+            matches_search = (search_query.lower() in b_name.lower()) or (search_query.lower() in b_data["desc"].lower())
+            if matches_cat and matches_search:
+                filtered_badges[b_name] = b_data
+
+        st.caption(f"Showing **{len(filtered_badges)}** badges")
+        
+        # Render Badges in 3 Grid Columns
+        badge_cols = st.columns(3)
+        for idx, (b_title, b_info) in enumerate(filtered_badges.items()):
+            col_target = badge_cols[idx % 3]
+            is_unlocked = b_title in st.session_state.unlocked_badges
+            
             with col_target:
-                if b_title in st.session_state.unlocked_badges:
+                if is_unlocked:
                     st.markdown(f"""
                         <div class='badge-card-unlocked'>
-                            <h3>{b_info['icon']} {b_title}</h3>
-                            <p>{b_info['desc']}</p>
-                            <small><b>UNLOCKED</b></small>
+                            <h4>{b_info['icon']} {b_title}</h4>
+                            <p style='font-size:0.85rem;'>{b_info['desc']}</p>
+                            <small><b>✅ UNLOCKED</b></small>
                         </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
                         <div class='badge-card'>
-                            <h3>🔒 {b_title}</h3>
-                            <p>{b_info['desc']}</p>
-                            <small>LOCKED</small>
+                            <h4>🔒 {b_title}</h4>
+                            <p style='font-size:0.85rem; color:#888;'>{b_info['desc']}</p>
+                            <small style='color:#666;'>LOCKED</small>
                         </div>
                     """, unsafe_allow_html=True)
-            idx += 1
 
 # ==============================================================================
 # TAB 7: ADVANCED ANALYTICS & HISTORY
@@ -1103,7 +1089,8 @@ with app_tabs[6]:
         data=csv_bytes,
         file_name="fitpulse_analytics_report.csv",
         mime="text/csv",
-        use_container_width=True
+        use_container_width=True,
+        key="btn_download_csv"
     )
 
 # ==============================================================================
@@ -1119,30 +1106,30 @@ with app_tabs[7]:
         
         with pf_col1:
             st.markdown("<div class='sub-header'>📋 Personal Details</div>", unsafe_allow_html=True)
-            in_name = st.text_input("Name:", value=p_data.get("name", "Athlete Pro"))
-            in_age = st.number_input("Age:", min_value=12, max_value=100, value=p_data.get("age", 25))
-            in_gender = st.selectbox("Gender:", ["Male", "Female"], index=0 if p_data.get("gender") == "Male" else 1)
-            in_weight = st.number_input("Weight (kg):", min_value=30.0, max_value=250.0, value=p_data.get("weight_kg", 76.0), step=0.5)
-            in_height = st.number_input("Height (cm):", min_value=100.0, max_value=230.0, value=p_data.get("height_cm", 178.0), step=1.0)
-            in_activity = st.selectbox("Activity Level:", ["Sedentary", "Lightly Active", "Moderately Active", "Very Active", "Extra Active"], index=2)
+            in_name = st.text_input("Name:", value=p_data.get("name", "Athlete Pro"), key="profile_name_input")
+            in_age = st.number_input("Age:", min_value=12, max_value=100, value=p_data.get("age", 25), key="profile_age_input")
+            in_gender = st.selectbox("Gender:", ["Male", "Female"], index=0 if p_data.get("gender") == "Male" else 1, key="profile_gender_select")
+            in_weight = st.number_input("Weight (kg):", min_value=30.0, max_value=250.0, value=p_data.get("weight_kg", 76.0), step=0.5, key="profile_weight_input")
+            in_height = st.number_input("Height (cm):", min_value=100.0, max_value=230.0, value=p_data.get("height_cm", 178.0), step=1.0, key="profile_height_input")
+            in_activity = st.selectbox("Activity Level:", ["Sedentary", "Lightly Active", "Moderately Active", "Very Active", "Extra Active"], index=2, key="profile_activity_select")
             
         with pf_col2:
             st.markdown("<div class='sub-header'>🎯 Daily Targets</div>", unsafe_allow_html=True)
-            in_cal_goal = st.number_input("Calorie Goal (kcal):", min_value=1000, max_value=6000, value=p_data.get("custom_cal_goal", 2400), step=50)
-            in_water_goal = st.number_input("Water Goal (Glasses):", min_value=4, max_value=25, value=p_data.get("custom_water_goal", 10), step=1)
-            in_prot_goal = st.number_input("Protein Goal (g):", min_value=20, max_value=400, value=p_data.get("protein_goal_g", 165), step=5)
-            in_carb_goal = st.number_input("Carbs Goal (g):", min_value=20, max_value=600, value=p_data.get("carbs_goal_g", 270), step=5)
-            in_fat_goal = st.number_input("Fat Goal (g):", min_value=10, max_value=200, value=p_data.get("fat_goal_g", 70), step=5)
-            in_fiber_goal = st.number_input("Fiber Goal (g):", min_value=10, max_value=100, value=p_data.get("fiber_goal_g", 32), step=2)
+            in_cal_goal = st.number_input("Calorie Goal (kcal):", min_value=1000, max_value=6000, value=p_data.get("custom_cal_goal", 2400), step=50, key="profile_cal_goal_input")
+            in_water_goal = st.number_input("Water Goal (Glasses):", min_value=4, max_value=25, value=p_data.get("custom_water_goal", 10), step=1, key="profile_water_goal_input")
+            in_prot_goal = st.number_input("Protein Goal (g):", min_value=20, max_value=400, value=p_data.get("protein_goal_g", 165), step=5, key="profile_prot_goal_input")
+            in_carb_goal = st.number_input("Carbs Goal (g):", min_value=20, max_value=600, value=p_data.get("carbs_goal_g", 270), step=5, key="profile_carb_goal_input")
+            in_fat_goal = st.number_input("Fat Goal (g):", min_value=10, max_value=200, value=p_data.get("fat_goal_g", 70), step=5, key="profile_fat_goal_input")
+            in_fiber_goal = st.number_input("Fiber Goal (g):", min_value=10, max_value=100, value=p_data.get("fiber_goal_g", 32), step=2, key="profile_fiber_goal_input")
             
         st.markdown("<div class='sub-header'>📏 Circumference Measurements (Navy Body Fat Calculator)</div>", unsafe_allow_html=True)
         m_c1, m_c2, m_c3 = st.columns(3)
         with m_c1:
-            in_neck = st.number_input("Neck Circumference (cm):", min_value=20.0, max_value=70.0, value=p_data.get("neck_cm", 38.0), step=0.5)
+            in_neck = st.number_input("Neck Circumference (cm):", min_value=20.0, max_value=70.0, value=p_data.get("neck_cm", 38.0), step=0.5, key="profile_neck_input")
         with m_c2:
-            in_waist = st.number_input("Waist Circumference (cm):", min_value=40.0, max_value=200.0, value=p_data.get("waist_cm", 81.0), step=0.5)
+            in_waist = st.number_input("Waist Circumference (cm):", min_value=40.0, max_value=200.0, value=p_data.get("waist_cm", 81.0), step=0.5, key="profile_waist_input")
         with m_c3:
-            in_hip = st.number_input("Hip Circumference (cm - Females):", min_value=40.0, max_value=200.0, value=p_data.get("hip_cm", 95.0), step=0.5)
+            in_hip = st.number_input("Hip Circumference (cm - Females):", min_value=40.0, max_value=200.0, value=p_data.get("hip_cm", 95.0), step=0.5, key="profile_hip_input")
 
         save_btn = st.form_submit_button("💾 Save Profile Configuration", use_container_width=True)
         
