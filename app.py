@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import datetime
 
 # 1. Page Configuration
 st.set_page_config(
@@ -12,17 +11,12 @@ st.set_page_config(
 # 2. Modern Glassmorphism & Custom CSS
 st.markdown("""
     <style>
-    /* Dark sleek background adjustments */
     .stApp {
         background-color: #0B0E14;
     }
-    
-    /* Modern card container styling */
     div[data-testid="stVerticalBlock"] > div[data-testid="stBlock"] {
         border-radius: 12px;
     }
-    
-    /* Metric Card Customization */
     div[data-testid="stMetric"] {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -30,8 +24,6 @@ st.markdown("""
         border-radius: 12px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
-    
-    /* Tab Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
     }
@@ -120,4 +112,42 @@ with tab_dash:
     
     with col_p1:
         with st.container(border=True):
-            st
+            st.markdown("### 🎯 Nutrition Progress")
+            cal_ratio = min(st.session_state.calories_eaten / calorie_goal, 1.0) if calorie_goal > 0 else 0
+            st.progress(cal_ratio)
+            st.caption(f"**{int(cal_ratio * 100)}%** of target reached ({st.session_state.calories_eaten} / {calorie_goal} kcal)")
+
+    with col_p2:
+        with st.container(border=True):
+            st.markdown("### 💧 Hydration Tracker")
+            water_ratio = min(st.session_state.water_glasses / water_goal, 1.0) if water_goal > 0 else 0
+            st.progress(water_ratio)
+            if st.session_state.water_glasses >= water_goal:
+                st.caption("🎉 **Daily hydration goal completed!** Excellent work.")
+            else:
+                st.caption(f"Logged **{st.session_state.water_glasses}** of {water_goal} glasses ({water_goal - st.session_state.water_glasses} to go).")
+
+    st.write("---")
+
+    # Bottom Dashboard Split: Chart + Activity Timeline
+    col_chart, col_timeline = st.columns([2, 1])
+    
+    with col_chart:
+        st.subheader("📈 Energy Balance Visualizer")
+        chart_data = pd.DataFrame({
+            "Category": ["Food Consumed", "Calories Burned"],
+            "Calories": [st.session_state.calories_eaten, st.session_state.calories_burned]
+        })
+        st.bar_chart(chart_data, x="Category", y="Calories", color="Category")
+
+    with col_timeline:
+        st.subheader("📜 Timeline Feed")
+        if st.session_state.activity_log:
+            for item in reversed(st.session_state.activity_log):
+                st.info(item)
+        else:
+            st.caption("No entries logged yet today. Use the 'Quick Entry' tab to get started!")
+
+# ==================== TAB 2: QUICK ENTRY ====================
+with tab_log:
+    st.subheader
