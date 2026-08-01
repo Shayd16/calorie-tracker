@@ -7,6 +7,21 @@ st.set_page_config(page_title="FitPulse Tracker", page_icon="⚡", layout="wide"
 st.title("⚡ FitPulse | Calorie & Water Tracker")
 st.caption("Track your daily nutrition, workouts, and hydration!")
 
+# Common food dictionary (Food Name: Calories per serving)
+FOOD_DATABASE = {
+    "Apple (Medium)": 95,
+    "Banana (Medium)": 105,
+    "Chicken Breast (6oz)": 280,
+    "Eggs (2 Large)": 140,
+    "Slice of Pizza": 285,
+    "Cheeseburger": 535,
+    "White Rice (1 Cup cooked)": 200,
+    "Oatmeal (1 Cup cooked)": 150,
+    "Protein Shake": 180,
+    "Greek Yogurt (1 Cup)": 130,
+    "Custom Amount (Enter manually)": 0
+}
+
 # Sidebar Settings
 st.sidebar.header("🎯 Daily Goals")
 calorie_goal = st.sidebar.number_input("Daily Calorie Target", value=2000, step=100, key="sidebar_cal_goal")
@@ -61,10 +76,19 @@ elif menu == "Log Activity":
     with col_food:
         with st.container(border=True):
             st.markdown("### 🍎 Food Entry")
-            food_cals = st.number_input("Calories Consumed", min_value=0, step=50, key="food_input")
+            
+            # Select or type food name
+            selected_food = st.selectbox("Search/Select Food:", list(FOOD_DATABASE.keys()))
+            
+            if selected_food == "Custom Amount (Enter manually)":
+                food_cals = st.number_input("Enter Calories:", min_value=0, step=50, key="custom_food")
+            else:
+                food_cals = FOOD_DATABASE[selected_food]
+                st.info(f"**{selected_food}** = {food_cals} kcal")
+            
             if st.button("➕ Log Food", use_container_width=True):
                 st.session_state.calories_eaten += food_cals
-                st.toast(f"Added {food_cals} calories!", icon="🥗")
+                st.toast(f"Added {food_cals} calories for {selected_food}!", icon="🥗")
 
     with col_ex:
         with st.container(border=True):
